@@ -1,0 +1,13 @@
+<% if (!user) { %>
+    <div class="hero-unit">
+        <h1>Welcome to Microblog</h1>
+        <p>Microblog is a demo system written in Node.js</p>
+        <p>
+            <a class="btn btn-primary btn-large" href="/login">Login</a>
+            <a class="btn btn-large" href="/reg">Register Now</a>
+        </p>
+    </div>
+<% } else { %>
+    <%- partial('say') %>
+<% } %>
+<%- partial('posts', {posts:posts}) %>

@@ -1,0 +1,13 @@
+Ubuntu kylin 14.04 64bit
+WebStorm: 8.01
+
+1.下载ws/keygen
+2.安装jdk(rpm失败，改用gz)
+手工解压缩；
+手工注册；
+环境变量；
+java -version; which java验证
+3.解压ws
+4.创建快捷方式
+usr/bin/startwebstorm文件
+desktop文件

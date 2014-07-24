@@ -1,0 +1,3 @@
+mongod --dbpath=/mongodbdata/mongodb_db --logpath=/mongodbdata/mongodb_logs/mongodb.log --logappend
+
+ps -def | grep mongod
