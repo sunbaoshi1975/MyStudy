@@ -1,6 +1,6 @@
 //hello.js - base class
 
-function Hello() {
+function Hello() {  // 构造函数
     var name;
 
     this.setName = function(thyName) {
