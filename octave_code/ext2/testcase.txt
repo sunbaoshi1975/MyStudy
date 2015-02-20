@@ -1,0 +1,132 @@
+https://class.coursera.org/ml-008/forum/thread?thread_id=597
+
+Test 1a:
+>>sigmoid(1)
+ans = 0.73106
+
+>>sigmoid(0)
+ans = 0.50000
+
+-------
+Test 1b:
+>>sigmoid([2 3])
+ans = 
+
+   0.88080 0.95257
+
+-------
+Test 1c:
+>>sigmoid([-2 0; 4 999999; -1 1])
+ans =
+
+   0.11920   0.50000
+   0.98201   1.00000
+   0.26894   0.73106
+
+>>sigmoid([ones(3,1) magic(3)])
+ans =
+
+   0.73106   0.99966   0.73106   0.99753
+   0.73106   0.95257   0.99331   0.99909
+   0.73106   0.98201   0.99988   0.88080
+
+--------------------------------------------------
+Test 2a:
+>>[J grad] = costFunction([-1 ; 0.2], [1 34 ; 1 35], [0 ; 1])
+J = 2.9027
+grad =
+
+   0.49725
+   16.90542
+
+-------
+Test 2b:
+>>[J grad] = costFunction(tan([1;2;3;4;5]), cos(magic(5)), [1;0;1;0;1])
+J =  0.69916
+grad =
+
+  -0.091193
+  -0.016494
+   0.054850
+  -0.014473
+  -0.075733
+
+-------
+Test 2c:
+>>[J grad] = costFunction([-2;1;2;2], [ones(3, 1)  magic(3)], [1;0;1])
+J = 8.3333
+grad =
+
+  0.33333
+  1.00000
+  1.66667
+  2.33333
+
+--------------------------------------------------
+Test 3a: (edited by CTA to add a "missing sigmoid()" catcher
+>>predict([0.3 ; 0.2], [1 2.4; 1 -17; 1 0.5])
+ans =
+
+   1
+   0
+   1
+
+--------------------------------------------------
+Test 4a:
+>>[J grad] = costFunctionReg([-1 ; 0.2], [1 34 ; 1 35], [0 ; 1], 1.4)
+J =  2.9167
+grad =
+
+    0.49725
+   17.04542
+
+-------
+Test 4b:
+>>[J grad] = costFunctionReg(cos([1;2;3;4;5]), sin(magic(5)), [1;0;1;0;1], 0.4)
+J =  1.0318
+grad =
+
+   0.33452
+   0.18135
+  -0.22943
+  -0.37968
+  -0.13559
+
+-------
+Test 4c: Uses a non-square X matrix, with first column of bias units (CTA contribution):
+>>X = [ones(3,1) magic(3)];
+>>y = [1 0 1]';
+>>theta = [-2 -1 1 2]';
+>>[J grad] = costFunctionReg(theta, X, y, 0)
+J =  4.6832
+grad =
+
+   0.31722
+   0.87232
+   1.64812
+   2.23787
+
+>>[J grad] = costFunctionReg(theta, X, y, 3)
+J =  7.6832
+grad =
+
+   0.31722
+  -0.12768
+   2.64812
+   4.23787
+
+Additional results from inside the function - use a "keyboard" command to break execution to the debugger.
+Run the second Test 4c case for costFunctionReg(), as shown with lambda = 3. 
+Here are the results for the unregularized and regularized terms for each of Cost and Gradient:
+J unregularized term = 4.6832
+J regularized term = 3.000
+grad unregularized vector: 
+    0.31722  ; corresponds to grad(1)
+    0.87232
+    1.64812
+    2.23787
+grad regularized vector:
+   -1.000  ; corresponds to grad(2)
+   1.000   ; corresponds to grad(3)
+   2.000   ; corresponds to grad(4)
+- provides testing with and without regularization.
