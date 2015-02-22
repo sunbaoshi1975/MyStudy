@@ -597,7 +597,7 @@ Here comes the predicted results.
 ### Accuracy
 With the randomForest package, we generated a high accurate model. The final model has 99.24% accuracy, 95% CI (0.9898, 0.9944) and above 0.99 Kappa.  
 
-The final results were submitted and prediction for all 20 testing cases are correct.  
+The final results were submitted and the prediction for 20 testing cases are all correct.  
 
 ### Out of Sample Error
 With a confusion matrix, we can see the number of Out of sample error is quite low.  
