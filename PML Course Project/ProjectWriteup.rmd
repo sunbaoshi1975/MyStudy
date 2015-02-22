@@ -216,11 +216,12 @@ selftesting <- training[-inTrain,]
 
 ### Model Training
 #### rf & nb
+Notes: In order to speed up compiling, I commented out the NB modeling code in Rmd file. Please feel free to open and run the code on your computer.
 ```{r}
 # rf
 modrf = randomForest(classe ~ ., data=selftraining, na.action=na.omit)
 # nb
-modnb = train(classe ~ ., data=selftraining, method="nb")
+#modnb = train(classe ~ ., data=selftraining, method="nb")
 ```
 
 By using randomForest package, rf model was generated quickly, whereas nb took a long time to output the model.
@@ -229,7 +230,7 @@ Then the two models were applied to self-testing dataset to see the accuracy of 
 ```{r}
 # Model Self-test   
 predrf = predict(modrf, selftesting)   
-prednb = predict(modnb, selftesting)   
+#prednb = predict(modnb, selftesting)   
 ```
 
 Please refer to the confusion matrix for the random forests model.  
@@ -240,7 +241,7 @@ However, the accuracy of NB is not acceptable, only got 70.57%.
 ##### rf: Sample Accuracy
 confusionMatrix(predrf, selftesting$classe)
 ##### nb: Sample Accuracy
-confusionMatrix(prednb, selftesting$classe)
+#confusionMatrix(prednb, selftesting$classe)
 ```
 
 >           Reference
