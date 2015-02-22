@@ -77,7 +77,7 @@ img {
 <ul>
 <li><p>Woking Directory A directory named ‘PML Course Project’ is built as the main working directory. All files related to this project will be stored in here. There is a sub-directory named ‘submission’ under the main directory. It is used to store the 20 prediction result files corresponding to the 20 different test cases. Please refer to the <a href>README.md</a> for detailed information about directories and files under this project.</p></li>
 <li><p>Raw Data The example data include both traning data and testing data, which were downloaded on Feb 5rd from the following URLs respectively: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a> <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a> They are in CVS format. The main working directory also hold a copy of the two data files.</p></li>
-<li><p>Software Packages To finish the project, a couple of software needs to be installed.<br />– R Version 3.1.2 64bit<br />– RStudio Version 0.98.1102<br />– notepad++ Version 6.7.4<br />The following packages in R are expected to be used: – knitr - markdown tools<br />– caret<br />– randomForest<br />– ggplot2</p></li>
+<li><p>Software Packages To finish the project, a couple of software needs to be installed.<br />– R Version 3.1.2 64bit<br />– RStudio Version 0.98.1102<br />– notepad++ Version 6.7.4<br />The following packages in R are expected to be used:<br />– knitr - markdown tools<br />– caret<br />– randomForest<br />– ggplot2</p></li>
 </ul>
 </div>
 </div>
@@ -94,88 +94,8 @@ rawData_testing &lt;- read.csv('pml-testing.csv', header=TRUE, sep=',', na.strin
 dim(rawData_training); dim(rawData_testing)</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
 <pre><code>## [1]  20 160</code></pre>
-<pre class="r"><code>names(rawData_training)</code></pre>
-<pre><code>##   [1] &quot;X&quot;                        &quot;user_name&quot;               
-##   [3] &quot;raw_timestamp_part_1&quot;     &quot;raw_timestamp_part_2&quot;    
-##   [5] &quot;cvtd_timestamp&quot;           &quot;new_window&quot;              
-##   [7] &quot;num_window&quot;               &quot;roll_belt&quot;               
-##   [9] &quot;pitch_belt&quot;               &quot;yaw_belt&quot;                
-##  [11] &quot;total_accel_belt&quot;         &quot;kurtosis_roll_belt&quot;      
-##  [13] &quot;kurtosis_picth_belt&quot;      &quot;kurtosis_yaw_belt&quot;       
-##  [15] &quot;skewness_roll_belt&quot;       &quot;skewness_roll_belt.1&quot;    
-##  [17] &quot;skewness_yaw_belt&quot;        &quot;max_roll_belt&quot;           
-##  [19] &quot;max_picth_belt&quot;           &quot;max_yaw_belt&quot;            
-##  [21] &quot;min_roll_belt&quot;            &quot;min_pitch_belt&quot;          
-##  [23] &quot;min_yaw_belt&quot;             &quot;amplitude_roll_belt&quot;     
-##  [25] &quot;amplitude_pitch_belt&quot;     &quot;amplitude_yaw_belt&quot;      
-##  [27] &quot;var_total_accel_belt&quot;     &quot;avg_roll_belt&quot;           
-##  [29] &quot;stddev_roll_belt&quot;         &quot;var_roll_belt&quot;           
-##  [31] &quot;avg_pitch_belt&quot;           &quot;stddev_pitch_belt&quot;       
-##  [33] &quot;var_pitch_belt&quot;           &quot;avg_yaw_belt&quot;            
-##  [35] &quot;stddev_yaw_belt&quot;          &quot;var_yaw_belt&quot;            
-##  [37] &quot;gyros_belt_x&quot;             &quot;gyros_belt_y&quot;            
-##  [39] &quot;gyros_belt_z&quot;             &quot;accel_belt_x&quot;            
-##  [41] &quot;accel_belt_y&quot;             &quot;accel_belt_z&quot;            
-##  [43] &quot;magnet_belt_x&quot;            &quot;magnet_belt_y&quot;           
-##  [45] &quot;magnet_belt_z&quot;            &quot;roll_arm&quot;                
-##  [47] &quot;pitch_arm&quot;                &quot;yaw_arm&quot;                 
-##  [49] &quot;total_accel_arm&quot;          &quot;var_accel_arm&quot;           
-##  [51] &quot;avg_roll_arm&quot;             &quot;stddev_roll_arm&quot;         
-##  [53] &quot;var_roll_arm&quot;             &quot;avg_pitch_arm&quot;           
-##  [55] &quot;stddev_pitch_arm&quot;         &quot;var_pitch_arm&quot;           
-##  [57] &quot;avg_yaw_arm&quot;              &quot;stddev_yaw_arm&quot;          
-##  [59] &quot;var_yaw_arm&quot;              &quot;gyros_arm_x&quot;             
-##  [61] &quot;gyros_arm_y&quot;              &quot;gyros_arm_z&quot;             
-##  [63] &quot;accel_arm_x&quot;              &quot;accel_arm_y&quot;             
-##  [65] &quot;accel_arm_z&quot;              &quot;magnet_arm_x&quot;            
-##  [67] &quot;magnet_arm_y&quot;             &quot;magnet_arm_z&quot;            
-##  [69] &quot;kurtosis_roll_arm&quot;        &quot;kurtosis_picth_arm&quot;      
-##  [71] &quot;kurtosis_yaw_arm&quot;         &quot;skewness_roll_arm&quot;       
-##  [73] &quot;skewness_pitch_arm&quot;       &quot;skewness_yaw_arm&quot;        
-##  [75] &quot;max_roll_arm&quot;             &quot;max_picth_arm&quot;           
-##  [77] &quot;max_yaw_arm&quot;              &quot;min_roll_arm&quot;            
-##  [79] &quot;min_pitch_arm&quot;            &quot;min_yaw_arm&quot;             
-##  [81] &quot;amplitude_roll_arm&quot;       &quot;amplitude_pitch_arm&quot;     
-##  [83] &quot;amplitude_yaw_arm&quot;        &quot;roll_dumbbell&quot;           
-##  [85] &quot;pitch_dumbbell&quot;           &quot;yaw_dumbbell&quot;            
-##  [87] &quot;kurtosis_roll_dumbbell&quot;   &quot;kurtosis_picth_dumbbell&quot; 
-##  [89] &quot;kurtosis_yaw_dumbbell&quot;    &quot;skewness_roll_dumbbell&quot;  
-##  [91] &quot;skewness_pitch_dumbbell&quot;  &quot;skewness_yaw_dumbbell&quot;   
-##  [93] &quot;max_roll_dumbbell&quot;        &quot;max_picth_dumbbell&quot;      
-##  [95] &quot;max_yaw_dumbbell&quot;         &quot;min_roll_dumbbell&quot;       
-##  [97] &quot;min_pitch_dumbbell&quot;       &quot;min_yaw_dumbbell&quot;        
-##  [99] &quot;amplitude_roll_dumbbell&quot;  &quot;amplitude_pitch_dumbbell&quot;
-## [101] &quot;amplitude_yaw_dumbbell&quot;   &quot;total_accel_dumbbell&quot;    
-## [103] &quot;var_accel_dumbbell&quot;       &quot;avg_roll_dumbbell&quot;       
-## [105] &quot;stddev_roll_dumbbell&quot;     &quot;var_roll_dumbbell&quot;       
-## [107] &quot;avg_pitch_dumbbell&quot;       &quot;stddev_pitch_dumbbell&quot;   
-## [109] &quot;var_pitch_dumbbell&quot;       &quot;avg_yaw_dumbbell&quot;        
-## [111] &quot;stddev_yaw_dumbbell&quot;      &quot;var_yaw_dumbbell&quot;        
-## [113] &quot;gyros_dumbbell_x&quot;         &quot;gyros_dumbbell_y&quot;        
-## [115] &quot;gyros_dumbbell_z&quot;         &quot;accel_dumbbell_x&quot;        
-## [117] &quot;accel_dumbbell_y&quot;         &quot;accel_dumbbell_z&quot;        
-## [119] &quot;magnet_dumbbell_x&quot;        &quot;magnet_dumbbell_y&quot;       
-## [121] &quot;magnet_dumbbell_z&quot;        &quot;roll_forearm&quot;            
-## [123] &quot;pitch_forearm&quot;            &quot;yaw_forearm&quot;             
-## [125] &quot;kurtosis_roll_forearm&quot;    &quot;kurtosis_picth_forearm&quot;  
-## [127] &quot;kurtosis_yaw_forearm&quot;     &quot;skewness_roll_forearm&quot;   
-## [129] &quot;skewness_pitch_forearm&quot;   &quot;skewness_yaw_forearm&quot;    
-## [131] &quot;max_roll_forearm&quot;         &quot;max_picth_forearm&quot;       
-## [133] &quot;max_yaw_forearm&quot;          &quot;min_roll_forearm&quot;        
-## [135] &quot;min_pitch_forearm&quot;        &quot;min_yaw_forearm&quot;         
-## [137] &quot;amplitude_roll_forearm&quot;   &quot;amplitude_pitch_forearm&quot; 
-## [139] &quot;amplitude_yaw_forearm&quot;    &quot;total_accel_forearm&quot;     
-## [141] &quot;var_accel_forearm&quot;        &quot;avg_roll_forearm&quot;        
-## [143] &quot;stddev_roll_forearm&quot;      &quot;var_roll_forearm&quot;        
-## [145] &quot;avg_pitch_forearm&quot;        &quot;stddev_pitch_forearm&quot;    
-## [147] &quot;var_pitch_forearm&quot;        &quot;avg_yaw_forearm&quot;         
-## [149] &quot;stddev_yaw_forearm&quot;       &quot;var_yaw_forearm&quot;         
-## [151] &quot;gyros_forearm_x&quot;          &quot;gyros_forearm_y&quot;         
-## [153] &quot;gyros_forearm_z&quot;          &quot;accel_forearm_x&quot;         
-## [155] &quot;accel_forearm_y&quot;          &quot;accel_forearm_z&quot;         
-## [157] &quot;magnet_forearm_x&quot;         &quot;magnet_forearm_y&quot;        
-## [159] &quot;magnet_forearm_z&quot;         &quot;classe&quot;</code></pre>
-<pre class="r"><code>table(rawData_training$user_name)</code></pre>
+<pre class="r"><code>#names(rawData_training)
+table(rawData_training$user_name)</code></pre>
 <pre><code>## 
 ##   adelmo carlitos  charles   eurico   jeremy    pedro 
 ##     3892     3112     3536     3070     3402     2610</code></pre>
@@ -183,173 +103,133 @@ dim(rawData_training); dim(rawData_testing)</code></pre>
 <pre><code>## 
 ##    A    B    C    D    E 
 ## 5580 3797 3422 3216 3607</code></pre>
-<pre class="r"><code>head(rawData_training, 3)</code></pre>
+<pre class="r"><code>head(rawData_training, 2)</code></pre>
 <pre><code>##   X user_name raw_timestamp_part_1 raw_timestamp_part_2   cvtd_timestamp
 ## 1 1  carlitos           1323084231               788290 05/12/2011 11:23
 ## 2 2  carlitos           1323084231               808298 05/12/2011 11:23
-## 3 3  carlitos           1323084231               820366 05/12/2011 11:23
 ##   new_window num_window roll_belt pitch_belt yaw_belt total_accel_belt
 ## 1         no         11      1.41       8.07    -94.4                3
 ## 2         no         11      1.41       8.07    -94.4                3
-## 3         no         11      1.42       8.07    -94.4                3
 ##   kurtosis_roll_belt kurtosis_picth_belt kurtosis_yaw_belt
 ## 1                 NA                  NA                NA
 ## 2                 NA                  NA                NA
-## 3                 NA                  NA                NA
 ##   skewness_roll_belt skewness_roll_belt.1 skewness_yaw_belt max_roll_belt
 ## 1                 NA                   NA                NA            NA
 ## 2                 NA                   NA                NA            NA
-## 3                 NA                   NA                NA            NA
 ##   max_picth_belt max_yaw_belt min_roll_belt min_pitch_belt min_yaw_belt
 ## 1             NA           NA            NA             NA           NA
 ## 2             NA           NA            NA             NA           NA
-## 3             NA           NA            NA             NA           NA
 ##   amplitude_roll_belt amplitude_pitch_belt amplitude_yaw_belt
 ## 1                  NA                   NA                 NA
 ## 2                  NA                   NA                 NA
-## 3                  NA                   NA                 NA
 ##   var_total_accel_belt avg_roll_belt stddev_roll_belt var_roll_belt
 ## 1                   NA            NA               NA            NA
 ## 2                   NA            NA               NA            NA
-## 3                   NA            NA               NA            NA
 ##   avg_pitch_belt stddev_pitch_belt var_pitch_belt avg_yaw_belt
 ## 1             NA                NA             NA           NA
 ## 2             NA                NA             NA           NA
-## 3             NA                NA             NA           NA
 ##   stddev_yaw_belt var_yaw_belt gyros_belt_x gyros_belt_y gyros_belt_z
 ## 1              NA           NA         0.00            0        -0.02
 ## 2              NA           NA         0.02            0        -0.02
-## 3              NA           NA         0.00            0        -0.02
 ##   accel_belt_x accel_belt_y accel_belt_z magnet_belt_x magnet_belt_y
 ## 1          -21            4           22            -3           599
 ## 2          -22            4           22            -7           608
-## 3          -20            5           23            -2           600
 ##   magnet_belt_z roll_arm pitch_arm yaw_arm total_accel_arm var_accel_arm
 ## 1          -313     -128      22.5    -161              34            NA
 ## 2          -311     -128      22.5    -161              34            NA
-## 3          -305     -128      22.5    -161              34            NA
 ##   avg_roll_arm stddev_roll_arm var_roll_arm avg_pitch_arm stddev_pitch_arm
 ## 1           NA              NA           NA            NA               NA
 ## 2           NA              NA           NA            NA               NA
-## 3           NA              NA           NA            NA               NA
 ##   var_pitch_arm avg_yaw_arm stddev_yaw_arm var_yaw_arm gyros_arm_x
 ## 1            NA          NA             NA          NA        0.00
 ## 2            NA          NA             NA          NA        0.02
-## 3            NA          NA             NA          NA        0.02
 ##   gyros_arm_y gyros_arm_z accel_arm_x accel_arm_y accel_arm_z magnet_arm_x
 ## 1        0.00       -0.02        -288         109        -123         -368
 ## 2       -0.02       -0.02        -290         110        -125         -369
-## 3       -0.02       -0.02        -289         110        -126         -368
 ##   magnet_arm_y magnet_arm_z kurtosis_roll_arm kurtosis_picth_arm
 ## 1          337          516                NA                 NA
 ## 2          337          513                NA                 NA
-## 3          344          513                NA                 NA
 ##   kurtosis_yaw_arm skewness_roll_arm skewness_pitch_arm skewness_yaw_arm
 ## 1               NA                NA                 NA               NA
 ## 2               NA                NA                 NA               NA
-## 3               NA                NA                 NA               NA
 ##   max_roll_arm max_picth_arm max_yaw_arm min_roll_arm min_pitch_arm
 ## 1           NA            NA          NA           NA            NA
 ## 2           NA            NA          NA           NA            NA
-## 3           NA            NA          NA           NA            NA
 ##   min_yaw_arm amplitude_roll_arm amplitude_pitch_arm amplitude_yaw_arm
 ## 1          NA                 NA                  NA                NA
 ## 2          NA                 NA                  NA                NA
-## 3          NA                 NA                  NA                NA
 ##   roll_dumbbell pitch_dumbbell yaw_dumbbell kurtosis_roll_dumbbell
 ## 1      13.05217      -70.49400    -84.87394                     NA
 ## 2      13.13074      -70.63751    -84.71065                     NA
-## 3      12.85075      -70.27812    -85.14078                     NA
 ##   kurtosis_picth_dumbbell kurtosis_yaw_dumbbell skewness_roll_dumbbell
 ## 1                      NA                    NA                     NA
 ## 2                      NA                    NA                     NA
-## 3                      NA                    NA                     NA
 ##   skewness_pitch_dumbbell skewness_yaw_dumbbell max_roll_dumbbell
 ## 1                      NA                    NA                NA
 ## 2                      NA                    NA                NA
-## 3                      NA                    NA                NA
 ##   max_picth_dumbbell max_yaw_dumbbell min_roll_dumbbell min_pitch_dumbbell
 ## 1                 NA               NA                NA                 NA
 ## 2                 NA               NA                NA                 NA
-## 3                 NA               NA                NA                 NA
 ##   min_yaw_dumbbell amplitude_roll_dumbbell amplitude_pitch_dumbbell
 ## 1               NA                      NA                       NA
 ## 2               NA                      NA                       NA
-## 3               NA                      NA                       NA
 ##   amplitude_yaw_dumbbell total_accel_dumbbell var_accel_dumbbell
 ## 1                     NA                   37                 NA
 ## 2                     NA                   37                 NA
-## 3                     NA                   37                 NA
 ##   avg_roll_dumbbell stddev_roll_dumbbell var_roll_dumbbell
 ## 1                NA                   NA                NA
 ## 2                NA                   NA                NA
-## 3                NA                   NA                NA
 ##   avg_pitch_dumbbell stddev_pitch_dumbbell var_pitch_dumbbell
 ## 1                 NA                    NA                 NA
 ## 2                 NA                    NA                 NA
-## 3                 NA                    NA                 NA
 ##   avg_yaw_dumbbell stddev_yaw_dumbbell var_yaw_dumbbell gyros_dumbbell_x
 ## 1               NA                  NA               NA                0
 ## 2               NA                  NA               NA                0
-## 3               NA                  NA               NA                0
 ##   gyros_dumbbell_y gyros_dumbbell_z accel_dumbbell_x accel_dumbbell_y
 ## 1            -0.02                0             -234               47
 ## 2            -0.02                0             -233               47
-## 3            -0.02                0             -232               46
 ##   accel_dumbbell_z magnet_dumbbell_x magnet_dumbbell_y magnet_dumbbell_z
 ## 1             -271              -559               293               -65
 ## 2             -269              -555               296               -64
-## 3             -270              -561               298               -63
 ##   roll_forearm pitch_forearm yaw_forearm kurtosis_roll_forearm
 ## 1         28.4         -63.9        -153                    NA
 ## 2         28.3         -63.9        -153                    NA
-## 3         28.3         -63.9        -152                    NA
 ##   kurtosis_picth_forearm kurtosis_yaw_forearm skewness_roll_forearm
 ## 1                     NA                   NA                    NA
 ## 2                     NA                   NA                    NA
-## 3                     NA                   NA                    NA
 ##   skewness_pitch_forearm skewness_yaw_forearm max_roll_forearm
 ## 1                     NA                   NA               NA
 ## 2                     NA                   NA               NA
-## 3                     NA                   NA               NA
 ##   max_picth_forearm max_yaw_forearm min_roll_forearm min_pitch_forearm
 ## 1                NA              NA               NA                NA
 ## 2                NA              NA               NA                NA
-## 3                NA              NA               NA                NA
 ##   min_yaw_forearm amplitude_roll_forearm amplitude_pitch_forearm
 ## 1              NA                     NA                      NA
 ## 2              NA                     NA                      NA
-## 3              NA                     NA                      NA
 ##   amplitude_yaw_forearm total_accel_forearm var_accel_forearm
 ## 1                    NA                  36                NA
 ## 2                    NA                  36                NA
-## 3                    NA                  36                NA
 ##   avg_roll_forearm stddev_roll_forearm var_roll_forearm avg_pitch_forearm
 ## 1               NA                  NA               NA                NA
 ## 2               NA                  NA               NA                NA
-## 3               NA                  NA               NA                NA
 ##   stddev_pitch_forearm var_pitch_forearm avg_yaw_forearm
 ## 1                   NA                NA              NA
 ## 2                   NA                NA              NA
-## 3                   NA                NA              NA
 ##   stddev_yaw_forearm var_yaw_forearm gyros_forearm_x gyros_forearm_y
-## 1                 NA              NA            0.03            0.00
-## 2                 NA              NA            0.02            0.00
-## 3                 NA              NA            0.03           -0.02
+## 1                 NA              NA            0.03               0
+## 2                 NA              NA            0.02               0
 ##   gyros_forearm_z accel_forearm_x accel_forearm_y accel_forearm_z
 ## 1           -0.02             192             203            -215
 ## 2           -0.02             192             203            -216
-## 3            0.00             196             204            -213
 ##   magnet_forearm_x magnet_forearm_y magnet_forearm_z classe
 ## 1              -17              654              476      A
-## 2              -18              661              473      A
-## 3              -18              658              469      A</code></pre>
+## 2              -18              661              473      A</code></pre>
 <p>We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column ‘X’, which is believed to be the row index). We can also tell the response variable is called “classe” and variable “user_name” stands for the name of participants.<br />&gt; [1] 19622 160 &gt; [1] 20 160 &gt; &gt; [1] “X” “user_name” “raw_timestamp_part_1”<br />&gt; [4] “raw_timestamp_part_2” “cvtd_timestamp” “new_window”<br />&gt; [7] “num_window” “roll_belt” “pitch_belt”<br />&gt; ……<br />&gt; [157] “magnet_forearm_x” “magnet_forearm_y” “magnet_forearm_z”<br />&gt; [160] “classe”</p>
 <p>6 participants and 5 classes (from A to E) are identified, which are corresponding to the project description. &gt; adelmo carlitos charles eurico jeremy pedro<br />&gt; 3892 3112 3536 3070 3402 2610</p>
 <blockquote>
 <p>A B C D E<br />5580 3797 3422 3216 3607</p>
 </blockquote>
-<p>When We go a little deeper into some data samples, we noticed these facts: * There are four types of sensors. They are “roll_belt”, “pitch_belt”, “yaw_belt” and “total_accel_belt”. * A high percentage of variables have “NA” values. * Among the 159 variables, some of they may have no relevancy to this research. * Some variables have values whose variance closes to zero. At this moment, we are not sure if they should be trimmed off. Therefore, during implementation phase data preprocessing should be applied.</p>
+<p>When we go a little deeper into some data samples, we noticed these facts: * There are four types of sensors. They are “roll_belt”, “pitch_belt”, “yaw_belt” and “total_accel_belt”. * A high percentage of variables have “NA” values. * Among the 159 variables, some of they may have no relevancy to this research. * Some variables have values whose variance closes to zero. At this moment, we are not sure if they should be trimmed off. Therefore, during implementation phase data preprocessing should be applied.</p>
 <pre class="r"><code># number of rows with no NA values
 sum(complete.cases(rawData_training))</code></pre>
 <pre><code>## [1] 0</code></pre>
@@ -363,15 +243,15 @@ sum(sapply(names(rawData_training), function(x) any(is.na(rawData_training[,x]))
 </div>
 <div id="model-selection" class="section level3">
 <h3>Model Selection</h3>
-<p>The project is a classification question. According to what I learned from the course, RPart, Bagging, Random Forests, Boosting, LDA and Naive Bayes are all suitable. Considering a sub 20 thousand dataset, we don’t have to worried about the speed. Random Forests is a outstanding choice. With rf, we can take the advantage for its accuracy. In addition, “In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error.”[<a href="http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr">Random Forests by Leo Breiman and Adele Cutler</a>]</p>
-<p>As a comparison, Naive Bayes algorithm is also applied. Due to the time constrains, I’ve decided not to try others algorithms. However, sometime after the course I’d like to make a fully comparison among all of above algorithms regarding this project.</p>
+<p>The project is a classification question. According to what I learned from the course, RPart, Bagging, Random Forests, Boosting, LDA and Naive Bayes are all suitable. Considering a sub 20 thousand dataset, we don’t have to worried about the speed. Random Forests (RF) is a outstanding choice. With RF, we can take the advantage of its accuracy. In addition, “In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error.”[<a href="http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr">Random Forests by Leo Breiman and Adele Cutler</a>]</p>
+<p>As a comparison, Naive Bayes algorithm is also applied, which is expected a lower accuacy but a better speed compared with RF model. I also used RPart method to help in feature selection. Due to the time constrains, I’ve decided not to try others algorithms. However, sometime after the course I’d like to make a fully comparison among all of above algorithms regarding this project.</p>
 </div>
 </div>
 <div id="implementation" class="section level2">
 <h2>Implementation</h2>
 <div id="data-cleaning" class="section level3">
 <h3>Data cleaning</h3>
-<p>For data cleaning, We have 3 tasks to do:<br />- 1. To delete irrelevant columns (the first 7) and convert non-number fields except “classe” column to number</p>
+<p>For data cleaning, we have 3 tasks to do:<br />- 1. To delete irrelevant columns (the first 7) and convert non-number fields except “classe” column to number</p>
 <pre class="r"><code>## 1. Delete irrelevant columns (the first 7)
 training &lt;- rawData_training[, -c(1:7)]
 testing &lt;- rawData_testing[, -c(1:7)]
@@ -384,10 +264,10 @@ suppressWarnings(testing[,-c(features)] &lt;- sapply(testing[,-c(features)], as.
 <li>To deal with columns with NA values</li>
 </ol></li>
 <li><ol start="3" style="list-style-type: decimal">
-<li>To trim off features with near zero variance [optional]<br />Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, we don’t think the speed would be a major consideration. We would like to mark this task as optional one and skip it in this turn.</li>
+<li>To trim off features with near zero variance [optional]<br />Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, I don’t think the speed would be a major consideration. I would like to mark this task as optional one and skip it in this turn.</li>
 </ol></li>
 </ul>
-<p>It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:<br />- Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information<br />- Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here.<br />- Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions</p>
+<p>It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:<br />- Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information<br />- Option 2: just remove columns with all or an excessive percentage of NAs. The threshold can be defined. For example, we choose 80% here.<br />- Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions</p>
 <p>Please refer to the following code lists:</p>
 <pre class="r"><code># Option 1: to delete any columns containing NAs, simplest method but may lose information
 training &lt;- training[, colSums(is.na(training)) == 0]
@@ -423,7 +303,7 @@ sum(sapply(names(training), function(x) any(is.na(training[,x]))))</code></pre>
 <p>[1] 0</p>
 </blockquote>
 <p>After this operation, We have no NA value anymore.</p>
-<p>Based on above analysis, I decided to run two rounds of modeling for feature selection. The first round goes with option 1 (52 features). And by using option 2 for the second round, the model will have 133 features with Threshold_NARatio of 98%. Then I can make a comparison and decide how many features I should keep.</p>
+<p>Based on above analysis, I decided to run two rounds of modeling for feature selection. The first round goes with option 1 (52 features). And by using option 2 for the second round, the model will have 133 features with Threshold_NARatio of 98% to see whether more features could provide better accuracy. Then I can make a comparison and decide how many features I should keep.</p>
 </div>
 <div id="feature-selection" class="section level3">
 <h3>Feature Selection</h3>
@@ -448,14 +328,14 @@ modFit &lt;- train(classe ~ ., method=&quot;rpart&quot;, data=training,
 ## No pre-processing
 ## Resampling: Cross-Validated (5 fold) 
 ## 
-## Summary of sample sizes: 15697, 15697, 15699, 15697, 15698 
+## Summary of sample sizes: 15697, 15699, 15697, 15697, 15698 
 ## 
 ## Resampling results across tuning parameters:
 ## 
 ##   cp          Accuracy   Kappa       Accuracy SD  Kappa SD  
-##   0.03567868  0.5231921  0.38204500  0.02466926   0.04144430
-##   0.05998671  0.4178904  0.21099738  0.06991381   0.11701420
-##   0.11515454  0.3162258  0.04851373  0.04363960   0.06647905
+##   0.03567868  0.5141683  0.36584127  0.01038116   0.01414839
+##   0.05998671  0.4426744  0.25256700  0.07305683   0.12163472
+##   0.11515454  0.3320773  0.07266417  0.04358043   0.06637135
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was cp = 0.03567868.</code></pre>
@@ -465,35 +345,35 @@ vi</code></pre>
 ## 
 ##   only 20 most important variables shown (out of 52)
 ## 
-##                      Overall
-## pitch_forearm         100.00
-## roll_forearm           72.97
-## roll_belt              70.36
-## magnet_dumbbell_y      49.51
-## accel_belt_z           43.02
-## magnet_belt_y          40.80
-## yaw_belt               40.41
-## magnet_dumbbell_z      36.37
-## total_accel_belt       35.34
-## magnet_arm_x           27.09
-## accel_arm_x            26.33
-## roll_dumbbell          18.67
-## accel_dumbbell_y       15.60
-## roll_arm               15.28
-## magnet_arm_z            0.00
-## total_accel_arm         0.00
-## yaw_forearm             0.00
-## accel_dumbbell_x        0.00
-## magnet_forearm_z        0.00
-## total_accel_dumbbell    0.00</code></pre>
+##                   Overall
+## pitch_forearm      100.00
+## roll_forearm        72.97
+## roll_belt           70.36
+## magnet_dumbbell_y   49.51
+## accel_belt_z        43.02
+## magnet_belt_y       40.80
+## yaw_belt            40.41
+## magnet_dumbbell_z   36.37
+## total_accel_belt    35.34
+## magnet_arm_x        27.09
+## accel_arm_x         26.33
+## roll_dumbbell       18.67
+## accel_dumbbell_y    15.60
+## roll_arm            15.28
+## magnet_arm_y         0.00
+## accel_dumbbell_z     0.00
+## gyros_arm_z          0.00
+## gyros_belt_z         0.00
+## magnet_forearm_y     0.00
+## accel_forearm_x      0.00</code></pre>
 <div id="round-1---52-predictors-removed-all-columns-with-na-value" class="section level4">
 <h4>Round 1 - 52 predictors (removed all columns with NA value)</h4>
 </div>
 <div id="round-2---133-predictors-removed-columns-with-ratio-of-na-value-98" class="section level4">
 <h4>Round 2 - 133 predictors (removed columns with ratio of NA value &gt;= 98%)</h4>
 <blockquote>
-<pre><code>                   Overall</code></pre>
-<p>pitch_forearm 100.00 roll_forearm 72.97 roll_belt 70.36 magnet_dumbbell_y 49.51 accel_belt_z 43.02 magnet_belt_y 40.80 yaw_belt 40.41 magnet_dumbbell_z 36.37 total_accel_belt 35.34 magnet_arm_x 27.09 accel_arm_x 26.33 roll_dumbbell 18.67 accel_dumbbell_y 15.60 roll_arm 15.28 skewness_roll_dumbbell 0.00 stddev_roll_arm 0.00 gyros_forearm_y 0.00 skewness_roll_belt 0.00 avg_roll_forearm 0.00 accel_belt_x 0.00</p>
+<pre><code>                   Overall  </code></pre>
+<p>pitch_forearm 100.00<br />roll_forearm 72.97<br />roll_belt 70.36<br />magnet_dumbbell_y 49.51<br />accel_belt_z 43.02<br />magnet_belt_y 40.80<br />yaw_belt 40.41<br />magnet_dumbbell_z 36.37<br />total_accel_belt 35.34<br />magnet_arm_x 27.09<br />accel_arm_x 26.33<br />roll_dumbbell 18.67<br />accel_dumbbell_y 15.60<br />roll_arm 15.28<br />skewness_roll_dumbbell 0.00<br />stddev_roll_arm 0.00 gyros_forearm_y 0.00 skewness_roll_belt 0.00 avg_roll_forearm 0.00 accel_belt_x 0.00</p>
 </blockquote>
 <p>As can be seen we had almost the same variable importance for the two rounds. And I am going to take the 14 predictors whose importance is greater than 0 to perform to real model training.</p>
 <pre class="r"><code># Weed out 0 importance features
@@ -566,11 +446,11 @@ confusionMatrix(predrf, selftesting$classe)</code></pre>
 <pre class="r"><code>##### nb: Sample Accuracy
 #confusionMatrix(prednb, selftesting$classe)</code></pre>
 <blockquote>
-<pre><code>      Reference</code></pre>
-<p>Prediction A B C D E A 1670 1 0 0 0 B 4 1130 10 0 1 C 0 7 1013 10 1 D 0 1 3 951 4 E 0 0 0 3 1076</p>
+<pre><code>      Reference  </code></pre>
+<p>Prediction A B C D E<br /> A 1670 1 0 0 0<br /> B 4 1130 10 0 1<br /> C 0 7 1013 10 1<br /> D 0 1 3 951 4<br /> E 0 0 0 3 1076</p>
 <p>Overall Statistics</p>
 <pre><code>           Accuracy : 0.9924          
-             95% CI : (0.9898, 0.9944)
+             95% CI : (0.9898, 0.9944)  
 No Information Rate : 0.2845          
 P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                       
@@ -596,6 +476,7 @@ finalpred   </code></pre>
 <div id="accuracy" class="section level3">
 <h3>Accuracy</h3>
 <p>With the randomForest package, we generated a high accurate model. The final model has 99.24% accuracy, 95% CI (0.9898, 0.9944) and above 0.99 Kappa.</p>
+<p>The final results were submitted and prediction for all 20 testing cases are correct.</p>
 </div>
 <div id="out-of-sample-error" class="section level3">
 <h3>Out of Sample Error</h3>

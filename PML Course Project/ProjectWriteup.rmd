@@ -28,7 +28,7 @@ To finish the project, a couple of software needs to be installed.
 -- R Version 3.1.2 64bit  
 -- RStudio Version 0.98.1102  
 -- notepad++ Version 6.7.4  
-The following packages in R are expected to be used:
+The following packages in R are expected to be used:  
 -- knitr - markdown tools  
 -- caret  
 -- randomForest  
@@ -45,10 +45,10 @@ rawData_testing <- read.csv('pml-testing.csv', header=TRUE, sep=',', na.strings=
 
 # Raw Data Exploration
 dim(rawData_training); dim(rawData_testing)
-names(rawData_training)
+#names(rawData_training)
 table(rawData_training$user_name)
 table(rawData_training$classe)
-head(rawData_training, 3)
+head(rawData_training, 2)
 ```
 
 We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column 'X', which is believed to be the row index). We can also tell the response variable is called "classe" and variable "user_name" stands for the name of participants.   
@@ -69,7 +69,7 @@ We can see there are 19622 and 20 examples in the training and testing datasets 
 > A    B    C    D    E  
 > 5580 3797 3422 3216 3607  
 
-When We go a little deeper into some data samples, we noticed these facts:
+When we go a little deeper into some data samples, we noticed these facts:
 * There are four types of sensors. They are "roll_belt", "pitch_belt", "yaw_belt" and "total_accel_belt".
 * A high percentage of variables have "NA" values.
 * Among the 159 variables, some of they may have no relevancy to this research.
@@ -88,13 +88,13 @@ sum(sapply(names(rawData_training), function(x) any(is.na(rawData_training[,x]))
 Furthermore, as we can see above, every example (row) contains at lease one NA value and there are 100 features (columns) with at lease one NA value. Therefore, it seems to be important to deal with those NA values properly. A couple of options will be discussed during data cleaning of implementation phase.
 
 ### Model Selection
-The project is a classification question. According to what I learned from the course, RPart, Bagging, Random Forests, Boosting, LDA and Naive Bayes are all suitable. Considering a sub 20 thousand dataset, we don't have to worried about the speed. Random Forests is a outstanding choice. With rf, we can take the advantage for its accuracy. In addition, "In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error."[[Random Forests by Leo Breiman and Adele Cutler](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr)]    
+The project is a classification question. According to what I learned from the course, RPart, Bagging, Random Forests, Boosting, LDA and Naive Bayes are all suitable. Considering a sub 20 thousand dataset, we don't have to worried about the speed. Random Forests (RF) is a outstanding choice. With RF, we can take the advantage of its accuracy. In addition, "In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error."[[Random Forests by Leo Breiman and Adele Cutler](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr)]    
 
-As a comparison, Naive Bayes algorithm is also applied. Due to the time constrains, I've decided not to try others algorithms. However, sometime after the course I'd like to make a fully comparison among all of above algorithms regarding this project.
+As a comparison, Naive Bayes algorithm is also applied, which is expected a lower accuacy but a better speed compared with RF model. I also used RPart method to help in feature selection. Due to the time constrains, I've decided not to try others algorithms. However, sometime after the course I'd like to make a fully comparison among all of above algorithms regarding this project.
 
 ## Implementation
 ### Data cleaning
-For data cleaning, We have 3 tasks to do:   
+For data cleaning, we have 3 tasks to do:   
 - 1. To delete irrelevant columns (the first 7) and convert non-number fields except "classe" column to number  
 ```{r}
 ## 1. Delete irrelevant columns (the first 7)
@@ -107,11 +107,11 @@ suppressWarnings(testing[,-c(features)] <- sapply(testing[,-c(features)], as.num
 ```
 - 2. To deal with columns with NA values
 - 3. To trim off features with near zero variance [optional]  
-Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, we don't think the speed would be a major consideration. We would like to mark this task as optional one and skip it in this turn.  
+Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, I don't think the speed would be a major consideration. I would like to mark this task as optional one and skip it in this turn.  
 
 It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:   
 - Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information   
-- Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here.   
+- Option 2: just remove columns with all or an excessive percentage of NAs. The threshold can be defined. For example, we choose 80% here.   
 - Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions   
 
 Please refer to the following code lists:
@@ -156,7 +156,7 @@ sum(sapply(names(training), function(x) any(is.na(training[,x]))))
 
 After this operation, We have no NA value anymore.    
 
-Based on above analysis, I decided to run two rounds of modeling for feature selection. The first round goes with option 1 (52 features). And by using option 2 for the second round, the model will have 133 features with Threshold_NARatio of 98%. Then I can make a comparison and decide how many features I should keep.
+Based on above analysis, I decided to run two rounds of modeling for feature selection. The first round goes with option 1 (52 features). And by using option 2 for the second round, the model will have 133 features with Threshold_NARatio of 98% to see whether more features could provide better accuracy. Then I can make a comparison and decide how many features I should keep.
 
 ### Feature Selection
 For feature selection, I tried to use rpart with 5-fold cross validation. As we talked above, I've run the test twice and compared the results of variable importance. Although the accuracy of rpart is unacceptable (less than 51%), I can still have the result of variable importance and decide the feature selection.
@@ -282,7 +282,9 @@ Here comes the predicted results.
 
 ## Results
 ### Accuracy
-With the randomForest package, we generated a high accurate model. The final model has 99.24% accuracy, 95% CI (0.9898, 0.9944) and above 0.99 Kappa.
+With the randomForest package, we generated a high accurate model. The final model has 99.24% accuracy, 95% CI (0.9898, 0.9944) and above 0.99 Kappa.  
+
+The final results were submitted and prediction for all 20 testing cases are correct.  
 
 ### Out of Sample Error
 With a confusion matrix, we can see the number of Out of sample error is quite low.  
