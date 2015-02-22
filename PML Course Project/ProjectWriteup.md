@@ -19,15 +19,15 @@ https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 They are in CVS format. The main working directory also hold a copy of the two data files.
 
 * Software Packages
-To finish the project, a couple of software needs to be installed.
-** R Version 3.1.2 64bit
-** RStudio Version 0.98.1102
-** notepad++ Version 6.7.4
+To finish the project, a couple of software needs to be installed.   
+-- R Version 3.1.2 64bit  
+-- RStudio Version 0.98.1102  
+-- notepad++ Version 6.7.4  
 The following packages in R are expected to be used:
-** knitr - markdown tools
-** caret
-** randomForest
-** ggplot2
+-- knitr - markdown tools  
+-- caret  
+-- randomForest  
+-- ggplot2  
 
 ## Planning
 ### Raw Data Exploration
@@ -325,10 +325,10 @@ head(rawData_training, 3)
 ## 3              -18              658              469      A
 ```
 
-We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column 'X', which is believed to be the row index). We can also tell the response variable is called "classe" and variable "user_name" stands for the name of participants.
-> [1] 19622   160  
+We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column 'X', which is believed to be the row index). We can also tell the response variable is called "classe" and variable "user_name" stands for the name of participants.   
+> [1] 19622   160
 > [1]  20 160
->
+> 
 > [1] "X"                        "user_name"                "raw_timestamp_part_1"  
 > [4] "raw_timestamp_part_2"     "cvtd_timestamp"           "new_window"  
 > [7] "num_window"               "roll_belt"                "pitch_belt"  
@@ -337,11 +337,11 @@ We can see there are 19622 and 20 examples in the training and testing datasets 
 > [160] "classe"  
 
 6 participants and 5 classes (from A to E) are identified, which are corresponding to the project description.
->  adelmo carlitos  charles   eurico   jeremy   pedro  
->  3892     3112     3536     3070     3402     2610  
->
->  A    B    C    D    E  
->  5580 3797 3422 3216 3607  
+> adelmo carlitos  charles   eurico   jeremy   pedro  
+> 3892     3112     3536     3070     3402     2610  
+
+> A    B    C    D    E  
+> 5580 3797 3422 3216 3607  
 
 When We go a little deeper into some data samples, we noticed these facts:
 * There are four types of sensors. They are "roll_belt", "pitch_belt", "yaw_belt" and "total_accel_belt".
@@ -380,8 +380,8 @@ As a comparison, Naive Bayes algorithm is also applied. Due to the time constrai
 
 ## Implementation
 ### Data cleaning
-For data cleaning, We have 3 tasks to do:
-1. To delete irrelevant columns (the first 7) and convert non-number fields except "classe" column to number
+For data cleaning, We have 3 tasks to do:   
+- 1. To delete irrelevant columns (the first 7) and convert non-number fields except "classe" column to number  
 
 ```r
 ## 1. Delete irrelevant columns (the first 7)
@@ -392,15 +392,15 @@ features = dim(training)[2]
 suppressWarnings(training[,-c(features)] <- sapply(training[,-c(features)], as.numeric))
 suppressWarnings(testing[,-c(features)] <- sapply(testing[,-c(features)], as.numeric))
 ```
-
-2. To deal with columns with NA values
-3. To trim off features with near zero variance [optional]
+- 2. To deal with columns with NA values
+- 3. To trim off features with near zero variance [optional]  
 Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, we don't think the speed would be a major consideration. We would like to mark this task as optional one and skip it in this turn.  
 
-It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:
-* Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information
-* Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here.
-* Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions
+It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:   
+- Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information   
+- Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here.   
+- Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions   
+
 Please refer to the following code lists:
 
 
@@ -444,10 +444,10 @@ dim(training);dim(testing)
 > [1] 19622    53  
 > [1] 20 53  
 
-When the threshold is 80%, we still expel the same 100 features as option 1 does. As computed, as long as the threshold is under 98%, the result stays the same. Only if we set the threshold upto 98%, we can encase more features.
-> # Threshold_NARatio = 0.98
+When the threshold is 80%, we still expel the same 100 features as option 1 does. As computed, as long as the threshold is under 98%, the result stays the same. Only if we set the threshold upto 98%, we can encase more features.   
+> ## Threshold_NARatio = 0.98   
 > [1] 19622   134  
-> [1]  20 134  
+> [1] 20 134  
 
 
 ```r
@@ -619,6 +619,7 @@ modrf = randomForest(classe ~ ., data=selftraining, na.action=na.omit)
 By using randomForest package, rf model was generated quickly, whereas nb took a long time to output the model.
 Then the two models were applied to self-testing dataset to see the accuracy of each algorithms.
 
+#### Model Self-test
 
 ```r
 # Model Self-test   
@@ -630,6 +631,7 @@ Please refer to the confusion matrix for the random forests model.
 As can be seen, the accuracy is prefect good, and reaches 99.24%.
 However, the accuracy of NB is not acceptable, only got 70.57%. 
 
+#### Sample Accuracy
 
 ```r
 ##### rf: Sample Accuracy
@@ -756,22 +758,6 @@ finalvi
 ## yaw_belt          1233.0589
 ```
   
->                     Overall
-> accel_arm_x        453.4735
-> accel_belt_z       592.8715
-> accel_dumbbell_y   678.5102
-> magnet_arm_x       443.0251
-> magnet_belt_y      601.6317
-> magnet_dumbbell_y  974.7378
-> agnet_dumbbell_z 1072.8141
-> pitch_forearm     1004.6471
-> roll_arm           611.1098
-> roll_belt         1418.3076
-> roll_dumbbell      663.9278
-> roll_forearm       796.0871
-> total_accel_belt   315.0171
-> yaw_belt          1233.0589
-
 ## Conclusions
 This is a great hand-on assignment. Although the final model is not complicated at all, the data exploration phase is quite a job. 
 In the real world, we are encountering the shift from information scarcity to surfeit. 

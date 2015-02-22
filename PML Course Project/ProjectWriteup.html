@@ -77,7 +77,7 @@ img {
 <ul>
 <li><p>Woking Directory A directory named ‘PML Course Project’ is built as the main working directory. All files related to this project will be stored in here. There is a sub-directory named ‘submission’ under the main directory. It is used to store the 20 prediction result files corresponding to the 20 different test cases. Please refer to the <a href>README.md</a> for detailed information about directories and files under this project.</p></li>
 <li><p>Raw Data The example data include both traning data and testing data, which were downloaded on Feb 5rd from the following URLs respectively: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a> <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a> They are in CVS format. The main working directory also hold a copy of the two data files.</p></li>
-<li><p>Software Packages To finish the project, a couple of software needs to be installed. ** R Version 3.1.2 64bit ** RStudio Version 0.98.1102 ** notepad++ Version 6.7.4 The following packages in R are expected to be used: ** knitr - markdown tools ** caret ** randomForest ** ggplot2</p></li>
+<li><p>Software Packages To finish the project, a couple of software needs to be installed.<br />– R Version 3.1.2 64bit<br />– RStudio Version 0.98.1102<br />– notepad++ Version 6.7.4<br />The following packages in R are expected to be used: – knitr - markdown tools<br />– caret<br />– randomForest<br />– ggplot2</p></li>
 </ul>
 </div>
 </div>
@@ -344,8 +344,11 @@ dim(rawData_training); dim(rawData_testing)</code></pre>
 ## 1              -17              654              476      A
 ## 2              -18              661              473      A
 ## 3              -18              658              469      A</code></pre>
-<p>We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column ‘X’, which is believed to be the row index). We can also tell the response variable is called “classe” and variable “user_name” stands for the name of participants. &gt; [1] 19622 160<br />&gt; [1] 20 160 &gt; &gt; [1] “X” “user_name” “raw_timestamp_part_1”<br />&gt; [4] “raw_timestamp_part_2” “cvtd_timestamp” “new_window”<br />&gt; [7] “num_window” “roll_belt” “pitch_belt”<br />&gt; ……<br />&gt; [157] “magnet_forearm_x” “magnet_forearm_y” “magnet_forearm_z”<br />&gt; [160] “classe”</p>
-<p>6 participants and 5 classes (from A to E) are identified, which are corresponding to the project description. &gt; adelmo carlitos charles eurico jeremy pedro<br />&gt; 3892 3112 3536 3070 3402 2610<br />&gt; &gt; A B C D E<br />&gt; 5580 3797 3422 3216 3607</p>
+<p>We can see there are 19622 and 20 examples in the training and testing datasets respectively, while the original data set contains 159 features (excluding the first column ‘X’, which is believed to be the row index). We can also tell the response variable is called “classe” and variable “user_name” stands for the name of participants.<br />&gt; [1] 19622 160 &gt; [1] 20 160 &gt; &gt; [1] “X” “user_name” “raw_timestamp_part_1”<br />&gt; [4] “raw_timestamp_part_2” “cvtd_timestamp” “new_window”<br />&gt; [7] “num_window” “roll_belt” “pitch_belt”<br />&gt; ……<br />&gt; [157] “magnet_forearm_x” “magnet_forearm_y” “magnet_forearm_z”<br />&gt; [160] “classe”</p>
+<p>6 participants and 5 classes (from A to E) are identified, which are corresponding to the project description. &gt; adelmo carlitos charles eurico jeremy pedro<br />&gt; 3892 3112 3536 3070 3402 2610</p>
+<blockquote>
+<p>A B C D E<br />5580 3797 3422 3216 3607</p>
+</blockquote>
 <p>When We go a little deeper into some data samples, we noticed these facts: * There are four types of sensors. They are “roll_belt”, “pitch_belt”, “yaw_belt” and “total_accel_belt”. * A high percentage of variables have “NA” values. * Among the 159 variables, some of they may have no relevancy to this research. * Some variables have values whose variance closes to zero. At this moment, we are not sure if they should be trimmed off. Therefore, during implementation phase data preprocessing should be applied.</p>
 <pre class="r"><code># number of rows with no NA values
 sum(complete.cases(rawData_training))</code></pre>
@@ -368,7 +371,7 @@ sum(sapply(names(rawData_training), function(x) any(is.na(rawData_training[,x]))
 <h2>Implementation</h2>
 <div id="data-cleaning" class="section level3">
 <h3>Data cleaning</h3>
-<p>For data cleaning, We have 3 tasks to do: 1. To delete irrelevant columns (the first 7) and convert non-number fields except “classe” column to number</p>
+<p>For data cleaning, We have 3 tasks to do:<br />- 1. To delete irrelevant columns (the first 7) and convert non-number fields except “classe” column to number</p>
 <pre class="r"><code>## 1. Delete irrelevant columns (the first 7)
 training &lt;- rawData_training[, -c(1:7)]
 testing &lt;- rawData_testing[, -c(1:7)]
@@ -376,11 +379,16 @@ testing &lt;- rawData_testing[, -c(1:7)]
 features = dim(training)[2]
 suppressWarnings(training[,-c(features)] &lt;- sapply(training[,-c(features)], as.numeric))
 suppressWarnings(testing[,-c(features)] &lt;- sapply(testing[,-c(features)], as.numeric))</code></pre>
-<ol start="2" style="list-style-type: decimal">
+<ul>
+<li><ol start="2" style="list-style-type: decimal">
 <li>To deal with columns with NA values</li>
-<li>To trim off features with near zero variance [optional] Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, we don’t think the speed would be a major consideration. We would like to mark this task as optional one and skip it in this turn.</li>
-</ol>
-<p>It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case: * Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information * Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here. * Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions Please refer to the following code lists:</p>
+</ol></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>To trim off features with near zero variance [optional]<br />Features with near zero variance may slow down the processing speed without improving the accuracy of the final model significantly. It should be a good practice to perform this step properly (by using function nearZeroVar()). However, given the limited amount of training data, we don’t think the speed would be a major consideration. We would like to mark this task as optional one and skip it in this turn.</li>
+</ol></li>
+</ul>
+<p>It is obvious that the focus for data cleaning is to deal with NA values (task 2). We have 3 options in this case:<br />- Option 1: to delete any columns containing NAs, which is the simplest method, but may lose information<br />- Option 2: just remove columns with all or an excessive ratio of NAs. The threshold can be defined. For example, we choose 20% here.<br />- Option 3: to convert NAs with numbers (e.g. 0), which is an easy way too, but will introduce additional assumptions</p>
+<p>Please refer to the following code lists:</p>
 <pre class="r"><code># Option 1: to delete any columns containing NAs, simplest method but may lose information
 training &lt;- training[, colSums(is.na(training)) == 0]
 testing &lt;- testing[, colSums(is.na(testing)) == 0]
@@ -403,7 +411,7 @@ dim(training);dim(testing)</code></pre>
 <blockquote>
 <p>[1] 19622 53<br />[1] 20 53</p>
 </blockquote>
-<p>When the threshold is 80%, we still expel the same 100 features as option 1 does. As computed, as long as the threshold is under 98%, the result stays the same. Only if we set the threshold upto 98%, we can encase more features. &gt; # Threshold_NARatio = 0.98 &gt; [1] 19622 134<br />&gt; [1] 20 134</p>
+<p>When the threshold is 80%, we still expel the same 100 features as option 1 does. As computed, as long as the threshold is under 98%, the result stays the same. Only if we set the threshold upto 98%, we can encase more features.<br />&gt; ## Threshold_NARatio = 0.98<br />&gt; [1] 19622 134<br />&gt; [1] 20 134</p>
 <pre class="r"><code>### Option 3: to convert NAs with numbers (e.g. 0), easy way but will introduce additional assumptions
 NAtoNum = 0.0
 training &lt;- replace(training, is.na(training), NAtoNum)
@@ -512,10 +520,16 @@ modrf = randomForest(classe ~ ., data=selftraining, na.action=na.omit)
 # nb
 #modnb = train(classe ~ ., data=selftraining, method=&quot;nb&quot;)</code></pre>
 <p>By using randomForest package, rf model was generated quickly, whereas nb took a long time to output the model. Then the two models were applied to self-testing dataset to see the accuracy of each algorithms.</p>
+</div>
+<div id="model-self-test" class="section level4">
+<h4>Model Self-test</h4>
 <pre class="r"><code># Model Self-test   
 predrf = predict(modrf, selftesting)   
 #prednb = predict(modnb, selftesting)   </code></pre>
 <p>Please refer to the confusion matrix for the random forests model.<br />As can be seen, the accuracy is prefect good, and reaches 99.24%. However, the accuracy of NB is not acceptable, only got 70.57%.</p>
+</div>
+<div id="sample-accuracy" class="section level4">
+<h4>Sample Accuracy</h4>
 <pre class="r"><code>##### rf: Sample Accuracy
 confusionMatrix(predrf, selftesting$classe)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
@@ -607,10 +621,6 @@ finalvi</code></pre>
 ## roll_forearm       796.0871
 ## total_accel_belt   315.0171
 ## yaw_belt          1233.0589</code></pre>
-<blockquote>
-<pre><code>                Overall</code></pre>
-<p>accel_arm_x 453.4735 accel_belt_z 592.8715 accel_dumbbell_y 678.5102 magnet_arm_x 443.0251 magnet_belt_y 601.6317 magnet_dumbbell_y 974.7378 agnet_dumbbell_z 1072.8141 pitch_forearm 1004.6471 roll_arm 611.1098 roll_belt 1418.3076 roll_dumbbell 663.9278 roll_forearm 796.0871 total_accel_belt 315.0171 yaw_belt 1233.0589</p>
-</blockquote>
 </div>
 </div>
 <div id="conclusions" class="section level2">
