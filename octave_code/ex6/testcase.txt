@@ -1,0 +1,130 @@
+https://class.coursera.org/ml-008/forum/thread?thread_id=1469
+
+---------------------------------------
+Test 1a (Gaussian Kernel):
+input:
+x1 = [3 2]; x2 = [-3 0]; sigma = 7;
+sim = gaussianKernel(x1, x2, sigma)
+
+output:
+sim =  0.66487
+
+
+---------------------------------------
+Test 2a (Parameters (C, sigma) for Dataset 3):
+
+load('ex6data3.mat');
+dataset3Params_search(X, y, Xval, yval);
+
+
+---------------------------------------
+Test 3a (Email Preprocessing):
+input:
+word_indices  = processEmail('ab abov abil ab footwork ab ab')
+
+output:
+==== Processed Email ====
+
+ab abov abil ab footwork ab ab 
+
+=========================
+word_indices =
+
+   2
+   6
+   3
+   2
+   2
+   2
+
+---------------------------------------
+Test 3b (Email Preprocessing):
+input:
+file_contents = readFile('emailSample1.txt');
+word_indices  = processEmail(file_contents)
+
+output:
+==== Processed Email ====
+
+anyon know how much it cost to host a web portal well it depend on how mani
+visitor you re expect thi can be anywher from less than number buck a month
+to a coupl of dollarnumb you should checkout httpaddr or perhap amazon ecnumb
+if your run someth big to unsubscrib yourself from thi mail list send an
+email to emailaddr
+
+=========================
+word_indices =
+                                                                                                           
+     86
+    916
+    794
+   1077
+    883
+    370
+   1699
+    790
+   1822
+   1831
+    883
+    431
+   1171
+    794
+   1002
+   1893
+   1364
+    592
+   1676
+    238
+    162
+     89
+    688
+    945
+   1663
+   1120
+ 1062
+   1699
+    375
+   1162
+    479
+   1893
+   1510
+    799
+   1182
+   1237
+    810
+   1895
+   1440
+   1547
+    181
+   1699
+   1758
+   1896
+    688
+   1676
+    992
+    961
+   1477
+     71
+    530
+   1699
+    531
+
+---------------------------------------
+Test 4a (mail Feature Extraction):
+input:
+x = emailFeatures([1 2 4 4 3 6]');
+x(1:7) 
+{CTA note: typo corrected}
+
+output:
+ans =
+
+   1
+   1
+   1
+   1
+   0
+   1
+   0
+
+(CTA note: 'x' will be a vector of size (1899x1). For this unit test, all values after x(6) are zeros.)
