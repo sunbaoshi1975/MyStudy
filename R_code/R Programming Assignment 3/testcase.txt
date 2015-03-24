@@ -1,0 +1,139 @@
+-----------------------------
+best <- function(state, outcome)
+-----------------------------
+test 1a
+------------------
+input:
+> source("best.R")
+> best("TX", "heart attack")
+output:
+[1] "CYPRESS FAIRBANKS MEDICAL CENTER"
+
+------------------
+test 1b
+------------------
+input:
+> best("TX", "heart failure")
+output:
+[1] "FORT DUNCAN MEDICAL CENTER"
+
+------------------
+test 1c
+------------------
+input:
+> best("MD", "heart attack")
+output:
+[1] "JOHNS HOPKINS HOSPITAL, THE"
+
+------------------
+test 1d
+------------------
+input:
+> best("MD", "pneumonia")
+output:
+[1] "GREATER BALTIMORE MEDICAL CENTER"
+
+------------------
+test 1e
+------------------
+input:
+> best("BB", "heart attack")
+output:
+Error in best("BB", "heart attack") : invalid state
+
+------------------
+test 1f
+------------------
+input:
+> best("NY", "hert attack")
+output:
+Error in best("NY", "hert attack") : invalid outcome
+
+-----------------------------
+rankhospital <- function(state, outcome, num = "best")
+-----------------------------
+test 2a
+------------------
+input:
+> source("rankhospital.R")
+> rankhospital("TX", "heart failure", 4)
+output:
+[1] "DETAR HOSPITAL NAVARRO"
+
+------------------
+test 2b
+------------------
+input:
+> rankhospital("MD", "heart attack", "worst")
+output:
+[1] "HARFORD MEMORIAL HOSPITAL"
+
+------------------
+test 2c
+------------------
+input:
+> rankhospital("MN", "heart attack", 5000)
+output:
+[1] NA
+
+------------------
+test 2d
+------------------
+input:
+> rankhospital("AL", "heart attack")
+output:
+[1] "CRESTWOOD MEDICAL CENTER"
+
+
+-----------------------------
+rankall <- function(outcome, num = "best")
+-----------------------------
+test 3a
+------------------
+input:
+> source("rankall.R")
+> result <- rankall("heart attack", 20)
+> class(result)
+> head(result, 10)
+output:
+[1] "data.frame"
+                              hospital state
+1                                 <NA>    AK
+2       D W MCMILLAN MEMORIAL HOSPITAL    AL
+3    ARKANSAS METHODIST MEDICAL CENTER    AR
+4  JOHN C LINCOLN DEER VALLEY HOSPITAL    AZ
+5                SHERMAN OAKS HOSPITAL    CA
+6             SKY RIDGE MEDICAL CENTER    CO
+7              MIDSTATE MEDICAL CENTER    CT
+8                                 <NA>    DC
+9                                 <NA>    DE
+10      SOUTH FLORIDA BAPTIST HOSPITAL    FL
+
+------------------
+test 3b
+------------------
+input:
+> tail(rankall("pneumonia", "worst"), 3)
+output:
+                                     hospital state
+52 MAYO CLINIC HEALTH SYSTEM - NORTHLAND, INC    WI
+53                     PLATEAU MEDICAL CENTER    WV
+54           NORTH BIG HORN HOSPITAL DISTRICT    WY
+
+------------------
+test 3c
+------------------
+input:
+> tail(rankall("heart failure"), 10)
+output:
+                                                            hospital state
+45                         WELLMONT HAWKINS COUNTY MEMORIAL HOSPITAL    TN
+46                                        FORT DUNCAN MEDICAL CENTER    TX
+47 VA SALT LAKE CITY HEALTHCARE - GEORGE E. WAHLEN VA MEDICAL CENTER    UT
+48                                          SENTARA POTOMAC HOSPITAL    VA
+49                            GOV JUAN F LUIS HOSPITAL & MEDICAL CTR    VI
+50                                              SPRINGFIELD HOSPITAL    VT
+51                                         HARBORVIEW MEDICAL CENTER    WA
+52                                    AURORA ST LUKES MEDICAL CENTER    WI
+53                                         FAIRMONT GENERAL HOSPITAL    WV
+54                                        CHEYENNE VA MEDICAL CENTER    WY

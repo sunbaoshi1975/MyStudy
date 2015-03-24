@@ -1,0 +1,122 @@
+---
+title: "rprog-ProgAssignment 3"
+author: "Baoshi Sun"
+date: "Tuesday, March 24, 2015"
+output: html_document
+---
+
+## 1. Plot the 30-day mortality rates for heart attack
+
+Read the outcome data into R via the read.csv function:
+
+```{r, echo=FALSE}
+##setwd("F:/Coursera/R/assi/ass 3")
+outcome <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+head(outcome)
+```
+
+```{r}
+##ncol(outcome)
+dim(outcome)
+names(outcome)
+```
+
+Make a simple histogram of the 30-day death rates from heart attack (column 11 in the outcome dataset):
+
+```{r, echo=FALSE}
+outcome[, 11] <- as.numeric(outcome[, 11])
+## You may get a warning about NAs being introduced; that is okay
+hist(outcome[, 11])
+```
+
+## 2. Finding the best hospital in a state
+```{r}
+source("best.R")
+best("TX", "heart attack")
+## Expected output:
+## [1] "CYPRESS FAIRBANKS MEDICAL CENTER"
+
+best("TX", "heart failure")
+## Expected output:
+## [1] "FORT DUNCAN MEDICAL CENTER"
+
+best("MD", "heart attack")
+## Expected output:
+## [1] "JOHNS HOPKINS HOSPITAL, THE"
+
+best("MD", "pneumonia")
+## Expected output:
+## [1] "GREATER BALTIMORE MEDICAL CENTER"
+
+best("BB", "heart attack")
+## Expected output:
+## Error in best("BB", "heart attack") : invalid state
+
+best("NY", "hert attack")
+## Expected output:
+## Error in best("NY", "hert attack") : invalid outcome
+```
+
+## 3. Ranking hospitals by outcome in a state
+```{r}
+source("rankhospital.R")
+rankhospital("TX", "heart failure", 4)
+## Expected output:
+## [1] "DETAR HOSPITAL NAVARRO"
+
+rankhospital("MD", "heart attack", "worst")
+## Expected output:
+## [1] "HARFORD MEMORIAL HOSPITAL"
+
+rankhospital("MN", "heart attack", 5000)
+## Expected output:
+## NA
+
+rankhospital("AL", "heart attack")
+## Expected output:
+## [1] "CRESTWOOD MEDICAL CENTER"
+```
+
+## 4. Ranking hospitals in all states
+```{r}
+source("rankall.R")
+result <- rankall("heart attack", 20)
+class(result)
+## Expected output:
+## [1] "data.frame"
+head(result, 10)
+## Expected output:
+##                               hospital state
+## 1                                 <NA>    AK
+## 2       D W MCMILLAN MEMORIAL HOSPITAL    AL
+## 3    ARKANSAS METHODIST MEDICAL CENTER    AR
+## 4  JOHN C LINCOLN DEER VALLEY HOSPITAL    AZ
+## 5                SHERMAN OAKS HOSPITAL    CA
+## 6             SKY RIDGE MEDICAL CENTER    CO
+## 7              MIDSTATE MEDICAL CENTER    CT
+## 8                                 <NA>    DC
+## 9                                 <NA>    DE
+## 10      SOUTH FLORIDA BAPTIST HOSPITAL    FL
+
+tail(rankall("pneumonia", "worst"), 3)
+## Expected output:
+##                                      hospital state
+## 52 MAYO CLINIC HEALTH SYSTEM - NORTHLAND, INC    WI
+## 53                     PLATEAU MEDICAL CENTER    WV
+## 54           NORTH BIG HORN HOSPITAL DISTRICT    WY
+
+tail(rankall("heart failure"), 10)
+## Expected output:
+##                                                             hospital state
+## 45                         WELLMONT HAWKINS COUNTY MEMORIAL HOSPITAL    TN
+## 46                                        FORT DUNCAN MEDICAL CENTER    TX
+## 47 VA SALT LAKE CITY HEALTHCARE - GEORGE E. WAHLEN VA MEDICAL CENTER    UT
+## 48                                          SENTARA POTOMAC HOSPITAL    VA
+## 49                            GOV JUAN F LUIS HOSPITAL & MEDICAL CTR    VI
+## 50                                              SPRINGFIELD HOSPITAL    VT
+## 51                                         HARBORVIEW MEDICAL CENTER    WA
+## 52                                    AURORA ST LUKES MEDICAL CENTER    WI
+## 53                                         FAIRMONT GENERAL HOSPITAL    WV
+## 54                                        CHEYENNE VA MEDICAL CENTER    WY
+```
+
