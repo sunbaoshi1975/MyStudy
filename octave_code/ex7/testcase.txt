@@ -1,0 +1,123 @@
+https://class.coursera.org/ml-008/forum/thread?thread_id=1633
+
+---------------------------------------
+Test 1a (Find Closest Centroids (k-Means)):
+input:
+findClosestCentroids([0 1; 5 5; -1 8], [7 6; -2 2])
+
+output:
+ans =
+   2
+   1
+   2
+
+-------
+Test 1b:
+input:
+X = magic(8);
+X = X(:, 2:4);
+centroids = magic(4);
+centroids = centroids(:,2:4);
+findClosestCentroids(X, centroids)
+
+output:
+ans =
+   1
+   4
+   4
+   2
+   4
+   3
+   3
+   4
+
+
+---------------------------------------
+Test 2a (Compute Centroid Means (k-Means)):
+input:
+computeCentroids([0 1; 5 5; -1 8], [2 1 2]', 2)
+
+output:
+ans =
+   5.00000   5.00000
+  -0.50000   4.50000
+
+-------
+Test 2b (Compute Centroid Means (k-Means)):
+(CTA Note: more robust test, more features, no centroid has a single entry)
+input:
+computeCentroids([magic(3) ; magic(3)], [1 2 3 2 3 1]', 3)
+
+output:
+ans =
+  6.00 5.00 4.00
+  5.50 3.00 6.50
+  3.50 7.00 4.50
+
+-------
+Test 2c (Compute Centroid Means (k-Means)) provided by Peter Lauri:
+input:
+computeCentroids([magic(3) ; magic(3) ; [8 1 7]], [1 2 3 2 3 1 1]', 3)
+
+output:
+ans =
+   6.6667   3.6667   5.0000
+   5.5000   3.0000   6.5000
+   3.5000   7.0000   4.5000
+
+
+---------------------------------------
+Test 3a (kMeansInitCentroids (used by ex7)):
+
+Note that by setting the seed for the PRNG to a fixed value, the sequence is repeatable. Of course you normally wouldn't do that, but it is exactly what you want in order to construct a test case.
+
+input:
+rand('state', 42);
+kMeansInitCentroids([1:10 ; 11:20]', 3)
+
+output:
+ans =
+    7   17
+    2   12
+    5   15
+
+Some students have reported different results for this test: these results were generated on octave 3.6.4 and confirmed on octave 3.2.4 and 3.8.2. Please report any different results below, along with the version of octave or matlab that you're using.
+
+
+---------------------------------------
+Test 4a (PCA):
+input:
+[U, S] = pca(sin([0 1; 2 3; 4 5]))
+
+output:
+U =
+  -0.65435  -0.75619
+  -0.75619   0.65435
+
+S =
+Diagonal Matrix
+   0.79551         0
+         0   0.22019
+
+
+---------------------------------------
+Test 5a (Project Data (PCA)):
+input:
+projectData(sin([0 1 2; 3 4 5; 6 7 8]), magic(3), 2)
+
+output:
+ans =
+    6.1616   12.3910
+   -4.9771  -12.2732
+    3.6931   11.9097
+
+
+---------------------------------------
+Test 6a (Recover Data (PCA)):
+input:
+recoverData([1 2; 3 4], magic(3), 2)
+
+output:
+ans =
+   10   13   22
+   28   29   48
