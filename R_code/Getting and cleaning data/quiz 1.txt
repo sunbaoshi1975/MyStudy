@@ -1,0 +1,58 @@
+Q1. How many properties are worth $1,000,000 or more?
+fileurl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+download.file(fileurl, destfile="housing2006_ID.csv")
+data <- read.csv("./housing2006_ID.csv")
+head(data)	## VAL feature stands for the property value
+## VAL == 24 means above 1m, remove NA
+data.val1m_up <- data[data$VAL==24,]
+nrow(data.val1m_up)	# 2129
+sum(!is.na(data.val1m_up$VAL))  # 53
+
+Q3.Download the Excel spreadsheet on Natural Gas Aquisition Program here:
+Read rows 18-23 and columns 7-15 into R and assign the result to a variable called data
+What is the value of: sum(dat$Zip*dat$Ext,na.rm=T) 
+# xslx no working without java
+# so use openxlsx instead
+##install.packages("xslx")
+##library(xslx)
+install.packages("openxlsx")
+library(openxlsx)
+dat <- read.xlsx("./getdata-data-DATA.gov_NGAP.xlsx", rows=18:23, cols=7:15)
+sum(dat$Zip*dat$Ext,na.rm=T)   # 36534720
+
+Q4.How many restaurants have zipcode 21231?
+install.packages("XML")
+library("XML")
+doc <- xmlTreeParse("getdata-data-restaurants.xml", useInternal=TRUE)
+rootNode <- xmlRoot(doc)
+xmlName(rootNode)
+zcode <- xpathSApply(doc, "//zipcode", xmlValue)
+sum(zcode == "21231")	# 127
+
+Q5.
+install.packages("data.table")
+library(data.table)
+DT <- fread("housing2006.csv")
+system.time({
+   for( loop in 1:1000 ) {
+#      tapply(DT$pwgtp15,DT$SEX,mean)
+# 1.95
+
+#      rowMeans(DT, NA.rm=TRUE)[DT$SEX==1]
+#      rowMeans(DT)[DT$SEX==2]
+      
+#      DT[,mean(pwgtp15),by=SEX]
+# 1.47
+
+#      mean(DT[DT$SEX==1,]$pwgtp15)
+#      mean(DT[DT$SEX==2,]$pwgtp15)
+# 52.71
+
+#      mean(DT$pwgtp15,by=DT$SEX)
+# 0.06, how ever only one result rather than two
+
+#      sapply(split(DT$pwgtp15,DT$SEX),mean)
+# 1.14
+   }
+})
+   
