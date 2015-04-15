@@ -1,0 +1,42 @@
+Q1. GitHub
+#Register an application on GitHub: DataScienceQuiz
+#callback URL: http://localhost:1410
+install.packages("httr")
+library(httr)
+install.packages("httpuv")
+library(httpuv)
+# Find OAuth settings for github:
+oauth_endpoints("github")
+myapp <- oauth_app("github", key="c6d982ffeb4dbfc9304f", secret="9c2a3258c8ade50e3bbdc0d61031c482126c079c")
+github_token <- oauth2.0_token(oauth_endpoints("github"), myapp)
+gtoken <- config(token = github_token)
+req <- GET("https://api.github.com/users/jtleek/repos", gtoken)
+stop_for_status(req)
+json1 <- content(req)
+json2 <- jsonlite::fromJSON(toJSON(json1))
+json2[json2$name=="datasharing",]
+
+Q2.
+install.packages("sqldf")
+library(sqldf)
+drv='SQLite' 
+fileurl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv"
+download.file(fileurl, destfile="acsdata.csv")
+acs <- read.csv("./acsdata.csv")
+sqldf("select pwgtp1 from acs where AGEP<50")
+
+Q3. 
+sqldf("select distinct AGEP from acs")
+
+Q4.
+con = url("http://biostat.jhsph.edu/~jleek/contact.html")
+htmlCode = readLines(con)
+close(con)
+lineno <- c(10,20,30,100)
+nchar(htmlCode[lineno])
+
+Q5.
+fileurl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fwksst8110.for"
+download.file(fileurl, destfile="getdata-wksst8110.for")
+data <- read.fwf("./getdata-wksst8110.for", skip=4, widths=c(10,-5,4,4,-5,4,4,-5,4,4,-5,4,4))
+sum(data$V4)
