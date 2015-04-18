@@ -1,0 +1,16 @@
+1. environment
+- Koding.com
+- Xmanager: Xshell, Xftp
+- refer: https://github.com/sunbaoshi1975/cloud-computing-development-environment
+
+2. testing & Submit
+- make (clean)
+- ./Application config(under testcase subdir)
+- ./Grading.sh
+- python submit.py
+
+3. testing tips
+- modify (backup needed) testcase to lower number of instances
+- modify Application.h (backup needed) to lower number of messages
+- study log
+- study Application.cpp and Grading.sh, add exta log/echo if necessary (backup needed)
