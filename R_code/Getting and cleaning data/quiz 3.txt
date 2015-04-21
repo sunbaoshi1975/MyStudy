@@ -1,0 +1,61 @@
+Q1. Create a logical vector that identifies the households on greater than 10 acres who sold more than $10,000 worth of agriculture products
+Assign that logical vector to the variable agricultureLogical.
+Apply the which() function like this to identify the rows of the data frame where the logical vector is TRUE. 
+which(agricultureLogical) What are the first 3 values that result?
+
+rawdata <- read.csv("./getdata-data-ss06hid.csv", stringsAsFactor=FALSE)
+agricultureLogical <- ifelse(rawdata$ACR==3 & rawdata$AGS==6, TRUE, FALSE)
+which(agricultureLogical)
+
+# 125, 238,262
+
+#library(dplyr)
+#house <- tbl_df(rawdata)
+#house.al <- filter(house, ACR=3 & AGS=6)
+
+Q2.
+install.packages("jpeg")
+library(jpeg)
+img <- readJPEG("./getdata-jeff.jpg", native=TRUE)
+quantile(img, c(0.3,0.8))
+# -15259150 -10575416
+
+Q3.
+#GDP <- read.csv("./getdata-data-GDP.csv", skip=5,skipNul =TRUE, header=FALSE,
+# colClasses=c("character", "character", "NULL", "character", "character"))
+GDP <- read.csv("./getdata-data-GDP.csv", skip=5,skipNul =TRUE, header=FALSE, stringsAsFactors=FALSE)
+GDP$V2 <- as.numeric(GDP$V2)
+GDP$V5 <- as.numeric(gsub(',','',GDP$V5))
+gdp_df <- tbl_df(GDP)
+gdp_df <- select(gdp_df, V1, V2, V4, V5) %>%
+  rename(shortcode=V1, rank=V2, country=V4, GDP=V5) %>%
+  arrange(desc(rank))
+gdp_df <- gdp_df[!is.na(gdp_df$rank),]
+gdp_df[13,]
+# 1       KNA  178 St. Kitts and Nevis 767
+
+EDS <- read.csv("./getdata-data-EDSTATS_Country.csv")
+eds_df <- tbl_df(EDS)
+list1 <- factor(gdp_df$shortcode)
+list2 <- factor(eds_df$CountryCode)
+length(intersect(list1, list2))
+#189
+
+Q4.
+eds_df <- rename(eds_df, shortcode=CountryCode)
+#gdp_eds <- arrange(join(gdp_df, eds_df), shortcode)
+gdp_eds <- merge(gdp_df, eds_df, by.x="shortcode", by.y="shortcode", all=TRUE)
+ge_df <- tbl_df(gdp_eds)
+ge_df <- select(ge_df, shortcode, rank, Income.Group, GDP)
+summarize(group_by(ge_df, Income.Group), mean(rank, na.rm=TRUE))
+
+Q5.
+top38 <- arrange(ge_df, desc(GDP))
+top38 <- top38[1:38,]
+top38_ls <- top38$shortcode
+
+ge_ml <- group_by(ge_df, Income.Group) %>% 
+   filter(Income.Group=='Lower middle income')
+ge_ml_ls <- ge_ml$shortcode
+length(intersect(ge_ml_ls, top38_ls))
+#5
