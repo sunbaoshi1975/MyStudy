@@ -1,0 +1,328 @@
+---
+title: "The Effects of Types of Weather Events in the United States"
+author: "Baoshi Sun"
+date: "Thursday, April 21, 2015"
+output:
+  html_document:
+    keep_md: yes
+---
+
+## Synopsis
+
+The purpose of this report is to analyze the consequences of different types of weather events in the United States based on NOAA Storm Database. The result of analysis consists of the most catastrophic weather events with respect to population health as well as economic situation. It turns out that the tornado caused the greatest casualties among all of the weather events, while the flood  caused the most amount of total economic damage and the HURRICANE/TYPHOON caused the most serious average economic damage. The report also reveals the differences of major types of disaster events regarding population health versus economic damage. 
+
+## Data Processing
+
+### Setting up working environment
+
+* Woking Directory  
+A directory named 'RepData_PeerAssessment2' is built as the main working directory of this report.
+
+* Software Packages
+To finish the project, a couple of software needs to be installed.   
+-- R Version 3.1.3 64bit  
+-- RStudio Version 0.98.1103  
+The following packages in R are expected to be used:  
+-- knitr - markdown tools  
+-- plyr, dplyr - manipulating data easier
+-- lubridate - data and time processing  
+-- ggplot2  
+
+Load necessary packages:   
+
+```{r}
+## load plyr, dplyr, lubridate and ggplot2
+library(dplyr)
+library(plyr)
+library(lubridate)
+library(ggplot2)
+```
+
+### Loading the Raw Data
+
+Only on the first time, we need to download the compressed data package from source at:
+https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2,
+and decompress it into csv data file named StormData.csv.   
+
+Everytime afterward, code should check the existance of the data file.
+
+```{r, cache=TRUE}
+fileURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+destfn <- "StormData.csv"
+if (!file.exists(destfn)) {
+    ## Download the data file
+    download.file(fileURL, destfile=destfn)
+}
+
+## Read cvs file
+data.raw <- read.csv(destfn, stringsAsFactors=FALSE, strip.white=TRUE, blank.lines.skip=TRUE)
+```
+
+Make an brief exploration on the raw data:  
+
+```{r}
+dim(data.raw)
+names(data.raw)
+str(data.raw)
+```
+
+As can be noticed, the following variables need to be prepcessed in order to :   
+- EVTYE: according to the National Weather Service (Source: https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), event type should be classified into 48 catagories. However, there are many mistakes (for example: prefix, surfix or spaces) which make values of this variable not standard        
+- PROPDMGEXP & CROPDMGEXP: should be alphabetical characters used to signify magnitude include "K" for thousands, "M" for millions, and "B" for billionsonly   
+
+
+### Processing the Raw Data
+
+In order to process data efficently, dplyr package is used and the loaded raw data  is assigned to data table with the name of stormdata. In addition, we only reserve the variables those relative to the analysis.
+
+```{r}
+stormdata <- tbl_df(data.raw)
+stormdata <- select(stormdata, STATE, BGN_DATE, BGN_TIME, EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP, WFO)
+
+## View the data
+stormdata
+```
+
+Then we can weed out the rows those have no corresponding consequence values.
+
+```{r}
+stormdata <- filter(stormdata, FATALITIES!=0 | INJURIES!=0 | PROPDMG!=0 | CROPDMG!=0)
+nrow(stormdata)
+
+```
+
+### Standardization of PROPDMGEXP & CROPDMGEXP
+
+Check the records whose value of PROPDMGEXP (or CROPDMGEXP) is not 'K', 'M' or 'B'.   
+
+
+```{r}
+tmpdata <- stormdata[!(stormdata$PROPDMGEXP %in% c("K", "M", "B"))  & stormdata$PROPDMG > 0,]
+errcount <- nrow(tmpdata)
+factor(tmpdata$PROPDMGEXP)
+```
+
+There are `r errcount` error fields need to fix. The following methods are applied:   
+-- replace 'k', 'm' and 'b' (lower case) with 'K, 'M' and 'B' respectively  
+-- replace other error values with 'K' (assumming typo or missing)  
+
+```{r}
+exp_KMB <- c("k"="K", "m"="M", "b"="B")
+stormdata$PROPDMGEXP <- revalue(stormdata$PROPDMGEXP, exp_KMB, warn_missing=FALSE)
+stormdata$PROPDMGEXP[!(stormdata$PROPDMGEXP %in% c("K", "M", "B")) & stormdata$PROPDMG > 0] <- "K"
+
+
+stormdata$CROPDMGEXP <- revalue(stormdata$CROPDMGEXP, exp_KMB, warn_missing=FALSE)
+stormdata$CROPDMGEXP[!(stormdata$CROPDMGEXP %in% c("K", "M", "B")) & stormdata$CROPDMG > 0] <- "K"
+```
+
+
+### Event Type Standardization
+
+There are a lot of errors for EVTYPE variable. We should make up the errors with common sense, but avoid introducting arbitary bias. The rules are listed below (in order):   
+-- all to upper case  
+-- remove all spaces  
+-- all containing THUNDERSTORM -> THUNDERSTORM  
+-- all containing TSTM -> THUNDERSTORM  
+-- all containing TORNADO -> TORNADO  
+-- all containing COLD or WINDCHILL -> COLD/WINDCHILL  
+-- all containing DROUGHT -> DROUGHT  
+-- all containing FLASH and FLOOD -> FLASH/FLOOD  
+-- all containing FLOOD but no FLASH -> FLOOD  
+-- all containing FROST or FREEZE -> FROST/FREEZE  
+-- all containing HEAT -> HEAT  
+-- all containing RAIN -> HEAVYRAIN  
+-- all containing SNOW -> HEAVYSNOW  
+-- all containing HURRICANE or TYPHOON -> HURRICANE/TYPHOON  
+-- all containing SURGE or TIDE -> SURGE/TIDE  
+-- all containing VOLCANIC -> VOLCANIC  
+-- all containing FIRE -> WILDFIRE  
+-- all containing WINTERWEATHER -> WINTERWEATHER  
+-- all containing WINTERSTORM -> WINTERSTORM  
+-- all containing HAIL -> HAIL  
+-- all containing SURF -> HIGHSURF  
+-- all containing WATERSPOUT -> WATERSPOUT  
+-- all containing STREAMFLOOD -> FLOOD  
+-- all containing URBANLOOD -> FLOOD  
+-- all containing RIVERFLOOD -> FLOOD  
+-- all containing SMLSTREAMFLD -> FLOOD  
+-- all containing URBAN and SMALL -> FLOOD  
+-- all containing STRONGWIND -> STRONGWIND  
+-- all containing HIGHWIND -> HIGHWIND  
+
+```{r}
+stormdata$EVTYPE <- toupper(stormdata$EVTYPE)
+stormdata$EVTYPE <- gsub("([ ])", "", stormdata$EVTYPE)
+stormdata$EVTYPE[grep("(THUNDERSTORM)", stormdata$EVTYPE)] <- "THUNDERSTORM"
+stormdata$EVTYPE[grep("(TSTM)", stormdata$EVTYPE)] <- "THUNDERSTORM"
+stormdata$EVTYPE[grep("(TORNADO)", stormdata$EVTYPE)] <- "TORNADO"
+stormdata$EVTYPE[grep("(COLD|WINDCHILL)", stormdata$EVTYPE)] <- "COLD/WINDCHILL"
+stormdata$EVTYPE[grep("(DROUGHT)", stormdata$EVTYPE)] <- "DROUGHT"
+stormdata$EVTYPE[grep("(FLASH).*(FLOOD)", stormdata$EVTYPE)] <- "FLASH/FLOOD"
+stormdata$EVTYPE[grep("(FLOOD).*(FLASH)", stormdata$EVTYPE)] <- "FLASH/FLOOD"
+stormdata$EVTYPE[grep("(FLOOD)[^(FLASH)]", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(FROST|FREEZE)", stormdata$EVTYPE)] <- "FROST/FREEZE"
+stormdata$EVTYPE[grep("(HEAT)", stormdata$EVTYPE)] <- "HEAT"
+stormdata$EVTYPE[grep("(RAIN)", stormdata$EVTYPE)] <- "HEAVYRAIN"
+stormdata$EVTYPE[grep("(SNOW)", stormdata$EVTYPE)] <- "HEAVYSNOW"
+stormdata$EVTYPE[grep("(HURRICANE|TYPHOON)", stormdata$EVTYPE)] <- "HURRICANE/TYPHOON"
+stormdata$EVTYPE[grep("(SURGE|TIDE)", stormdata$EVTYPE)] <- "SURGE/TIDE"
+stormdata$EVTYPE[grep("(VOLCANIC)", stormdata$EVTYPE)] <- "VOLCANIC"
+stormdata$EVTYPE[grep("(FIRE)", stormdata$EVTYPE)] <- "WILDFIRE"
+stormdata$EVTYPE[grep("(WINTERWEATHER)", stormdata$EVTYPE)] <- "WINTERWEATHER"
+stormdata$EVTYPE[grep("(WINTERSTORM)", stormdata$EVTYPE)] <- "WINTERSTORM"
+stormdata$EVTYPE[grep("(HAIL)", stormdata$EVTYPE)] <- "HAIL"
+stormdata$EVTYPE[grep("(SURF)", stormdata$EVTYPE)] <- "HIGHSURF"
+stormdata$EVTYPE[grep("(WATERSPOUT)", stormdata$EVTYPE)] <- "WATERSPOUT"
+stormdata$EVTYPE[grep("(STREAMFLOOD)", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(URBANFLOOD)", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(RIVERFLOOD)", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(SMLSTREAMFLD)", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(URBAN).*(SMALL)", stormdata$EVTYPE)] <- "FLOOD"
+stormdata$EVTYPE[grep("(STRONGWIND)", stormdata$EVTYPE)] <- "STRONGWIND"
+stormdata$EVTYPE[grep("(HIGHWIND)", stormdata$EVTYPE)] <- "HIGHWIND"
+
+# Check the number of event type
+numEvent <- length(unique(stormdata$EVTYPE))
+```
+
+Through above processing, there are still `r numEvent` types of event left.
+
+** It is also noticed that some records can not be categoried properly. For instance, EVTYPE 'WIND' and 'WINDS' can not be determined to put in HIGHWIND or STRONGWIND. Futher information is necessary. **  
+
+```{r}
+table(grep("^WIND", stormdata$EVTYPE, value=TRUE))
+```
+
+Nevertheless, the top 30 numbers of events already covered more than 99.6% of all events. In other words, the long tailed unclassified events will not affect our analysis. This refined variable is good enough for next analytic work.
+
+```{r}
+orderedevent <- sort(table(stormdata$EVTYPE), decreasing=TRUE)
+sum(orderedevent[1:30]) / sum(orderedevent)
+```
+
+### Grouping and Summarization
+
+Group the processed data set by EVTYPE and aggregate the largest numbers for FATALITIES, INJURIES and PROPDMG+CROPDMG. But before we can sum up, we'd better to merge PROPDMGEXP/DROPDMGEXP with PROPDMG/CROPDMG. To do so, three new variables are added: PROPDMGVALUE, CROPDMGVALUE and TOTALDMGVALUE.  
+
+
+``` {r}
+value_KMB <- c("K"=1e+3, "M"=1e+6, "B"=1e+9)
+## Convert to numeric
+stormdata$PROPDMGEXP <- as.numeric(revalue(stormdata$PROPDMGEXP, value_KMB, warn_missing=FALSE))
+stormdata$CROPDMGEXP <- as.numeric(revalue(stormdata$CROPDMGEXP, value_KMB, warn_missing=FALSE))
+
+## Calculate damage value
+stormdata <- mutate(stormdata, PROPDMGVALUE=PROPDMG*PROPDMGEXP)
+stormdata <- mutate(stormdata, CROPDMGVALUE=CROPDMG*CROPDMGEXP)
+stormdata$PROPDMGVALUE[is.na(stormdata$PROPDMGVALUE)] <- 0
+stormdata$CROPDMGVALUE[is.na(stormdata$CROPDMGVALUE)] <- 0
+stormdata <- mutate(stormdata, TOTALDMGVALUE=PROPDMGVALUE+CROPDMGVALUE)
+
+## Group and Summarize
+detach(package:plyr)
+library(dplyr)
+stormsum <- group_by(stormdata, EVTYPE) %>%
+    summarize(count=n(), mean_fatality=mean(FATALITIES), total_fatality=sum(FATALITIES), mean_injury=mean(INJURIES), total_injury=sum(INJURIES), mean_damage=mean(TOTALDMGVALUE), total_damage=sum(TOTALDMGVALUE))
+```
+
+## Results
+
+``` {r}
+n_count <- 10
+```
+
+So far we have already got the aggregated dataset by event type. Therefore, we can sort and figure out the top `r n_count` types of events which caused the biggest casualties and property damage.
+
+* Question 1: Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?  
+
+```{r}
+#library(dplyr)
+topfatality <- arrange(stormsum, desc(total_fatality), desc(mean_fatality))
+topfatality <- topfatality[1:n_count,]
+#topfatality <- filter(topfatality, c(1:n_count))
+select(topfatality, EVTYPE:total_fatality)
+```
+
+```{r}
+topinjury <- arrange(stormsum, desc(total_injury), desc(mean_injury))
+topinjury <- topinjury[1:n_count,]
+#topinjury <- filter(topinjury, c(1:n_count))
+select(topinjury, EVTYPE:count, mean_injury:total_injury)
+```
+
+As can be seen, in terms of both total fatalities and total injuries, 'TORNADO' had the biggest numbers of casualties across the United States. However, when we look at the average casualties in each individual event, 'HEAT' caused the most serious casualties during those years.  
+
+
+* Question 2: Across the United States, which types of events have the greatest economic consequences?  
+
+```{r}
+totaldamage <- arrange(stormsum, desc(total_damage), desc(mean_damage))
+totaldamage <- totaldamage[1:n_count,]
+select(totaldamage, EVTYPE:count, mean_damage:total_damage)
+
+meandamage <- arrange(stormsum, desc(mean_damage), desc(total_damage))
+meandamage <- meandamage[1:n_count,]
+select(meandamage, EVTYPE:count, mean_damage:total_damage)
+```
+
+As to the overall damage, the 'Flood' occupies the top of the list followed by the HURRICANE/TYPHOON and TORNADO. Whereas the HURRICANE/TYPHOON, the SURGE/TIDE and the EXCESSIVEWETNESS are the top 3 causes of average damage in single event.
+
+** There is only one obvervation of the 'EXCESSIVEWETNESS' type. But we have no idea about how to group it. This is a question point. **  
+
+Since as can be noticed that some weather events which caused heavy casualties did not incur huge economic damage, while other events with huge economic damage did not accompany with much injuries or fatalities, it is necessary to take a closer look at the connections between the two kinds of consequences caused by the major weather events. For this purpose, the following steps are applied to the 'stormsum' data set:  
+
+-- Add a new variable 'total_casualty' = total_fatalities * 10 + total_injury, which means one fatality would be considered as 10 injuries.  
+-- Add a new variable 'mean_casualty'  
+-- Exclude records whose event count is less than 10 so that to reduct bias
+-- Combine and compare the top 10 total_casualty along with the top 10 total_damage  
+-- Combine and compare the top 10 mean_casualty along with the top 10 mean_damage
+
+
+```{r}
+## extent variables
+stormsum <- mutate(stormsum, total_casualty=total_fatality * 10 + total_injury, mean_casualty=total_casualty/count)
+
+## combine and compare on total basis
+stormsum_countabove10 <- filter(stormsum, count>=10)
+topcasualty <- arrange(stormsum_countabove10, desc(total_casualty), desc(mean_casualty))
+topcasualty <- topcasualty[1:n_count,]
+totaldamage <- arrange(stormsum_countabove10, desc(total_damage), desc(mean_damage))
+totaldamage <- totaldamage[1:n_count,]
+toptotal <- rbind(topcasualty, totaldamage) %>%
+    select(EVTYPE, count, total_casualty, total_damage) %>%
+    unique %>%
+    print
+
+## combine and compare on mean basis
+meancasualty <- arrange(stormsum_countabove10, desc(mean_casualty), desc(total_casualty))
+meancasualty <- meancasualty[1:n_count,]
+meandamage <- arrange(stormsum_countabove10, desc(mean_damage), desc(total_damage))
+meandamage <- meandamage[1:n_count,]
+topmean <- rbind(meancasualty, meandamage) %>%
+    select(EVTYPE, count, mean_casualty, mean_damage) %>%
+    unique %>%
+    print
+
+## 
+
+## Plot
+library(ggplot2)
+theme_set(theme_bw())
+qplot(total_casualty, total_damage, data=toptotal, geom="jitter", main="Overall Casualties versus Damage of Major Weather Events", xlab="Overall Casualties", ylab="Overall Damage (US$)", color=factor(EVTYPE), size=3)
+
+qplot(mean_casualty, mean_damage, data=topmean, geom="jitter", main="Average Casualties versus Damage of Major Weather Events", xlab="Mean Casualties", ylab="Mean Damage (US$)", color=factor(EVTYPE), size=5)
+
+```
+
+From both of the plots, no obvious linear dependent is found between the consequences of human health and economic damage caused by the major weather events.
+
+
+## Futher Studies
+
+There are a couple of tasks can be done next, which may give us more insight of the data.   
+
+* Chronolngical analysis  
+* Analysis based on regions / states  
+
+
