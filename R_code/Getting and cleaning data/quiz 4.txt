@@ -1,0 +1,51 @@
+Q1. Apply strsplit() to split all the names of the data frame on the characters "wgtp". What is the value of the 123 element of the resulting list?
+
+fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+destdir <- "housing2006_ID_4.csv"
+if(!file.exists(destdir)) {
+	download.file(fileURL, destfile=destdir)
+}
+data <- read.csv(destdir)
+splitNames <- strsplit(names(data), "wgtp")
+splitNames
+
+Q2.Remove the commas from the GDP numbers in millions of dollars and average them. What is the average?
+fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv"
+destdir <- "GDP_4.csv"
+if(!file.exists(destdir)) {
+	download.file(fileURL, destfile=destdir)
+}
+gdp <- read.csv(destdir, skip=5, header=F, blank.lines.skip=TRUE)
+gdp <- gdp[1:190,]
+gdp$V5 <- as.numeric(gsub(',','',gdp$V5))
+mean(gdp$V5)
+
+Q3.In the data set from Question 2 what is a regular expression that would allow you to count the number of countries whose name begins with "United"? 
+grep("^United",gdp$V4)
+
+Q4.
+GDP <- read.csv("./getdata-data-GDP.csv", skip=5,skipNul =TRUE, header=FALSE, stringsAsFactors=FALSE)
+GDP$V2 <- as.numeric(GDP$V2)
+GDP$V5 <- as.numeric(gsub(',','',GDP$V5))
+gdp_df <- tbl_df(GDP)
+gdp_df <- select(gdp_df, V1, V2, V4, V5) %>%
+  rename(shortcode=V1, rank=V2, country=V4, GDP=V5) %>%
+  arrange(desc(rank))
+gdp_df <- gdp_df[!is.na(gdp_df$rank),]
+download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv", destfile="./EDSTATS_Country4.csv")
+EDS <- read.csv("./EDSTATS_Country4.csv")
+eds_df <- tbl_df(EDS)
+eds_df <- rename(eds_df, shortcode=CountryCode)
+gdp_eds <- merge(gdp_df, eds_df, by.x="shortcode", by.y="shortcode", all=TRUE)
+ge_df <- tbl_df(gdp_eds)
+length(grep("[Ff]iscal.*June",ge_df$Special.Notes))
+
+Q5. You can use the quantmod (http://www.quantmod.com/) package to get historical stock prices for publicly traded companies on the NASDAQ and NYSE. Use the following code to download data on Amazon's stock price and get the times the data was sampled.
+How many values were collected in 2012? How many values were collected on Mondays in 2012?
+
+library(quantmod)
+amzn = getSymbols("AMZN",auto.assign=FALSE)
+sampleTimes = index(amzn)
+library(lubridate)
+sum(year(sampleTimes)==2012)	# 250
+sum(year(sampleTimes)==2012 & weekdays(sampleTimes)=="Monday") # 47

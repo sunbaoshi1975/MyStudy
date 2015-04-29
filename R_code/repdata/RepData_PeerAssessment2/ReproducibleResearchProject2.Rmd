@@ -325,4 +325,5 @@ There are a couple of tasks can be done next, which may give us more insight of 
 * Chronolngical analysis  
 * Analysis based on regions / states  
 
-
+* Ref1: http://rpubs.com/ErnaO/77067 (library(gridExtra))
+* Ref2: https://rpubs.com/abhishekjee/76966 (detailed; library(treemap))
