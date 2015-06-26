@@ -1,0 +1,407 @@
+#---------------------------------------------
+# Statistical Inference Exercises & Quiz
+#---------------------------------------------
+## Week 1
+#---------------------------------------------
+## - Exercises
+# 
+
+#-------------------------
+## - Quiz
+#
+
+#---------------------------------------------
+## Week 2
+#---------------------------------------------
+## - Exercises
+## -- Variance
+# 1
+
+## -- Some common distributions
+# 1. Your friend claims that changing the font to comic sans will result in more ad revenue on your web sites. 
+## When presented in random order, 9 pages out of 10 had more revenue when the font was set to comic sans. 
+## If it was really a coin flip for these 10 sites, what’s the probability of getting 9 or 10 out of 10 with more revenue for the new font?
+1 - pbinom(8, size=10, prob=0.9)
+
+# 2. A software company is doing an analysis of documentation errors of their products. 
+## They sampled their very large codebase in chunks and found that 
+## the number of errors per chunk was approximately normally distributed with a mean of 11 errors and a standard deviation of 2. 
+## When randomly selecting a chunk from their codebase, what's the probability of fewer than 5 documentation errors?
+pnorm(5, mean=11, sd=2)   or    pnorm((5-11)/2)
+
+# 3. The number of search entries entered at a web site is Poisson at a rate of 9 searches per minute. 
+## The site is monitored for 5 minutes. What is the probability of 40 or fewer searches in that time frame?
+ppois(40, lambda=9*5)
+
+# 4. Suppose that the number of web hits to a particular site are approximately normally distributed with a mean of 100 hits per day
+## and a standard deviation of 10 hits per day. What’s the probability that a given day has fewer than 93 hits per day
+## expressed as a percentage to the nearest percentage point?
+round(pnorm(93, mean=100, sd=10)*100)
+
+# 5. Suppose that the number of web hits to a particular site are approximately normally distributed with a mean of 100 hits per day
+## and a standard deviation of 10 hits per day. What number of web hits per day represents the number so that only 5% of days have more hits?
+## Express your answer to 3 decimal places.
+format(qnorm(0.05, mean=100, sd=10, lower.tail=FALSE), digits=3)
+
+# 6. Suppose that the number of web hits to a particular site are approximately normally distributed with a mean of 100 hits per day
+## and a standard deviation of 10 hits per day. Imagine taking a random sample of 50 days.
+## What number of web hits would be the point so that only 5% of averages of 50 days of web traffic have more hits?
+round(qnorm(0.95, mean=100, sd=10/sqrt(50)), 3)
+
+# 7. You don’t believe that your friend can discern good wine from cheap. Assuming that you’re right,
+## in a blind test where you randomize 6 paired varieties (Merlot, Chianti, …) of cheap and expensive wines. What is the change that she gets 5 or 6 right?
+1-pbinom(4, size=6, prob=0.5)  or  pbinom(4, size=6, prob=0.5, lower.tail=FALSE)
+
+# 8. The number of web hits to a site is Poisson with mean 16.5 per day. What is the probability of getting 20 or fewer in 2 days?
+## Expressed as a percentage to one decimal place?
+round(ppois(20, lambda=16.5*2)*100,1)
+
+## -- Asymptotics
+# 1. I simulate 1,000,000 standard normals. The LLN says that their sample average must be close to?
+# 0
+
+# 2. About what is the probability of getting 45 or fewer heads out 100 flips of a fair coin? (Use the CLT, not the exact binomial calculation).
+(45-50) / (0.5 / 10)
+
+# 3. Consider the father.son data. Using the CLT and assuming that the fathers are a random sample from a population of interest,
+## what is a 95% confidence mean height in inches?
+???
+
+# 4. The goal of a a confidence interval having coverage 95% is to imply that:
+## [Yes] If one were to repeated collect samples and reconstruct the intervals, around 95% percent of them would contain the true mean being estimated.
+## The probability that the sample mean is in the interval is 95%.
+
+# 5. The rate of search entries into a web site was 10 per minute when monitoring for an hour.
+## Use R to calculate the exact Poisson interval for the rate of events per minute?
+poisson.test(10, T=60)$conf
+
+# 6. Consider a uniform distribution. If we were to sample 100 draws from a a uniform distribution (which has mean 0.5, and variance 1/12) 
+## and take their mean, \bar X. What is the approximate probability of getting as large as 0.51 or larger?
+# round((0.51-0.5) / (sqrt(1/12) * 10)*100,3)
+round(pnorm(0.51, mean=0.5, sd=sqrt(1/12/100), lower.tail=FALSE), 3)
+
+#-------------------------
+## - Quiz
+# Q2: Suppose that diastolic blood pressures (DBPs) for men aged 35-44 are normally distributed with a mean of 80 (mm Hg) and a standard deviation of 10.
+## About what is the probability that a random 35-44 year old has a DBP less than 70?
+round(pnorm(70, mean=80, sd=10)*100,2)
+
+# Q3: Brain volume for adult women is normally distributed with a mean of about 1,100 cc for women with a standard deviation of 75 cc.
+## What brain volume represents the 95th percentile?
+qnorm(0.95, mean=1100, sd=75)
+
+# Q4: Refer to the previous question. Brain volume for adult women is about 1,100 cc for women with a standard deviation of 75 cc.
+## Consider the sample mean of 100 random adult women from this population. What is the 95th percentile of the distribution of that sample mean?
+1100 + 1.64 * 7.5
+round(qnorm(.95, mean = 1100, sd = 75 / sqrt(100) ), 3)
+
+# Q5: You flip a fair coin 5 times, about what's the probability of getting 4 or 5 heads?
+pbinom(3, size=5, prob=0.5, lower.tail=FALSE)
+
+# Q6: The respiratory disturbance index (RDI), a measure of sleep disturbance, for a specific population has a mean of 15 (sleep events per hour)
+## and a standard deviation of 10. They are not normally distributed. Give your best estimate of the probability that a sample mean RDI of 100 people
+## is between 14 and 16 events per hour?
+# 1 * sigma = 68%, 2 * sigma  = 95%
+
+# Q7: Consider a standard uniform density. The mean for this density is .5 and the variance is 1 / 12.
+## You sample 1,000 observations from this distribution and take the sample mean, what value would you expect it to be near?
+
+# Q8: The number of people showing up at a bus stop is assumed to be Poisson with a mean of 5 people per hour.
+## You watch the bus stop for 3 hours. About what's the probability of viewing 10 or fewer people?
+ppois(10, lambda=5*3)
+
+#---------------------------------------------
+## Week 3
+#---------------------------------------------
+## - Exercises
+## -- T confidence
+# 4. Load the data set mtcars in the datasets R package. Calculate a 95% confidence interval to the nearest MPG for the variable mpg.
+library(datasets); data(mtcars)
+round(t.test(mtcars$mpg)$conf.int)
+
+# 5. Suppose that standard deviation of 9 paired differences is $1$.
+## What value would the average difference have to be so that the lower endpoint of a 95% students t confidence interval touches zero?
+round(qt(.975, df=8) * 1 / 3, 2)
+
+# 7. Consider the mtcars dataset. Construct a 95% T interval for MPG comparing 4 to 6 cylinder cars (subtracting in the order of 4 - 6) assume a constant variance.
+library(datasets); data(mtcars)
+m4 <- mtcars$mpg[mtcars$cyl==4]
+m6 <- mtcars$mpg[mtcars$cyl==6]
+confint <- as.vector(t.test(m4, m6, var.equal=TRUE)$conf.int)
+round(confint, 1)
+
+# 10. Suppose that 18 obese subjects were randomized, 9 each, to a new diet pill and a placebo.
+## Subjects’ body mass indices (BMIs) were measured at a baseline and again after having received the treatment or placebo for four weeks.
+## The average difference from follow-up to the baseline (followup - baseline) was 3 kg/m2 for the treated group and 1 kg/m2 for the placebo group.
+## The corresponding standard deviations of the differences was 1.5 kg/m2 for the treatment group and 1.8 kg/m2 for the placebo group.
+## The study aims to answer whether the change in BMI over the four week period appear to differ between the treated and placebo groups.
+## What is the pooled variance estimate? 
+n1 <- n2 <- 9
+x1 <- -3 ## treated
+s1 <- 1.5
+x2 <- 1  # placebo
+s2 <- 1.8
+spsq <- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
+round(spsq, 2)
+
+## -- Hypothesis Testing
+# 3. Load the data set mtcars in the datasets R package. Assume that the data set mtcars is a random sample.
+## Compute the mean MPG, \bar x, of this sample. You want to test whether the true MPG is \mu_0 or smaller using a one sided 5% level test.
+## (H_0 : \mu = \mu_0 versus H_a : \mu < \mu_0). Using that data set and a Z test: Based on the mean MPG of the sample \bar x, and by using a Z test:
+## what is the smallest value of \mu_0 that you would reject for (to two decimal places)? 
+mn <- mean(mtcars$mpg)
+s <- sd(mtcars$mpg)
+z <- qnorm(.05)
+mu0 <- mn - z * s / sqrt(nrow(mtcars))
+round(mu0,2)
+
+# 4. Consider again the mtcars dataset. Use a two group t-test to test the hypothesis that the 4 and 6 cyl cars have the same mpg.
+## Use a two sided test with unequal variances. Do you reject? 
+m4 <- mtcars$mpg[mtcars$cyl==4]
+m6 <- mtcars$mpg[mtcars$cyl==6]
+p <- t.test(m4, m6, paired=FALSE, alternative="two.sided", var.equal=FALSE)$p.value
+## Yes, because p = 0.0004 < 0.025
+
+# 5. A sample of 100 men yielded an average PSA level of 3.0 with a sd of 1.1.
+## What are the complete set of values that a 5% two sided Z test of H_0 : \mu = \mu_0 would fail to reject the null hypothesis for?
+3+c(-1,1)*qnorm(.025)*1.1/10
+
+# 6. You believe the coin that you’re flipping is biased towards heads.
+## You get 55 heads out of 100 flips. Do you reject at the 5% level that the coin is fair?
+round(pbinom(54, prob=.5, size=100, lower.tail=FALSE),4)
+## No, 0.1841 > 0.05
+
+# 7. Suppose that in an AB test, one advertising scheme led to an average of 10 purchases per day for a sample of 100 days,
+## while the other led to 11 purchases per day, also for a sample of 100 days.
+## Assuming a common standard deviation of 4 purchases per day.
+## Assuming that the groups are independent and that they days are iid, perform a Z test of equivalence.
+## Do you reject at the 5% level?
+n1 <- n2 <- 100
+m1 <- 10; m2 <- 11
+sd <- 4
+se <- sd * sqrt(1/n1 + 1/n2)
+ts <- (m2 - m1) / se
+pv <- 2 * pnorm(-abs(ts))
+## No, 0.077 > 0.05
+
+# 8. A confidence interval for the mean contains:
+##[OK] All of the values of the hypothesized mean for which we would fail to reject with \alpha = 1 - Conf. Level.
+## All of the values of the hypothesized mean for which we would fail to reject with 2 \alpha = 1 - Conf. Level.
+## All of the values of the hypothesized mean for which we would reject with \alpha = 1 - Conf. Level.
+## All of the values of the hypothesized mean for which we would reject with 2 \alpha = 1 - Conf. Level.
+
+# 9. In a court of law, all things being equal, if via policy you require a lower standard of evidence to convict people then
+## Less guilty people will be convicted.
+##[OK] More innocent people will be convicted.
+## More Innocent people will be not convicted. 
+
+## -- P-value
+# 4. Consider again the mtcars dataset. Use a two group t-test to test the hypothesis that the 4 and 6 cyl cars have the same mpg.
+## Use a two sided test with unequal variances. Give a P-value.
+m4 <- mtcars$mpg[mtcars$cyl==4]
+m6 <- mtcars$mpg[mtcars$cyl==6]
+p <- t.test(m4, m6, paired=FALSE, alternative="two.sided", var.equal=FALSE)$p.value
+
+# 5. You believe the coin that you’re flipping is biased towards heads.
+## You get 55 heads out of 100 flips. Give an exact P-value for the hypothesis that the coin is fair.
+round(pbinom(54, prob=.5, size=100, lower.tail=FALSE), 4)
+## No, 0.1841 > 0.05
+
+# 6. A web site was monitored for a year and it received 520 hits per day.
+## In the first 30 days in the next year, the site received 15,800 hits. Assuming that web hits are Poisson.
+## Give an exact one sided P-value to the hypothesis that web hits are up this year over last.
+## Do you reject?
+pv <- ppois(15800-1, lambda=520*30, lower.tail=FALSE)
+round(pv, 4)
+# No, 0.0553 > 0.05
+
+# 7. Suppose that in an AB test, one advertising scheme led to an average of 10 purchases per day for a sample of 100 days,
+## while the other led to 11 purchases per day, also for a sample of 100 days.
+## Assuming a common standard deviation of 4 purchases per day.
+## Assuming that the groups are independent and that they days are iid, perform a Z test of equivalence.
+## Give a P-value for the test?
+n1 <- n2 <- 100
+m1 <- 10; m2 <- 11
+sd <- 4
+se <- sd * sqrt(1/n1 + 1/n2)
+ts <- (m2 - m1) / se
+pv <- 2 * pnorm(-abs(ts))
+## No, 0.077 > 0.05
+
+# 8. Consider the mtcars data set.
+## Give the p-value for a t-test comparing MPG for 6 and 8 cylinder cars assuming equal variance,
+## as a proportion to 3 decimal places.
+m6 <- mtcars$mpg[mtcars$cyl==6]
+m8 <- mtcars$mpg[mtcars$cyl==8]
+n6 <- length(m6); n8 <- length(m8)
+mn6 <- mean(m6); mn8 <- mean(m8)
+s6 <- sd(m6); s8 <- sd(m8)
+p <- t.test(m8, m6, paired=FALSE, alternative="two.sided", var.equal=TRUE)$p.value
+round(p, 3)
+## Give the associated P-value for a z test.
+## Give the common standard deviation estimate for MPG across cylinders to 3 decimal places.
+mixprob <- (n8-1) / (n8 + n6 - 2)
+s <- sqrt(mixprob * s8 ^ 2 + (1 - mixprob) * s6 ^ 2)
+round(s, 3)
+## Would the t test reject at the two sided 0.05 level (0 for no 1 for yes)?
+z <- (mn8 - mn6) / (s * sqrt(1/n8+1/n6))
+pz <- 2 * pnorm(-abs(z))
+
+#-------------------------
+## - Quiz
+# Q1. In a population of interest,
+## a sample of 9 men yielded a sample average brain volume of 1,100cc and a standard deviation of 30cc.
+## What is a 95% Student's T confidence interval for the mean brain volume in this new population?
+## mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+round(1100 + c(-1, 1)*qt(.975, 8) * 30 / sqrt(9),0)
+# [1077,1123]
+
+# Q2. A diet pill is given to 9 subjects over six weeks. The average difference in weight (follow up - baseline) is -2 pounds.
+## What would the standard deviation of the difference in weight have to be for the upper endpoint of the 95% T confidence interval to touch 0?
+2*sqrt(9) / qt(.025, df=8, lower.tail = FALSE)
+# 2.60
+
+# Q4. 
+m_new <- 3; m_old <- 5
+v_new <- 0.6; v_old <- 0.68
+n_new <- n_old <- 10
+spsq <- ((n_new - 1) * v_new + (n_old - 1) * v_old) / (n_new + n_old - 2)
+confint <- m_new - m_old + c(-1, 1) * qt(.975, n_new + n_old - 2) * sqrt(spsq * (1/n_new + 1/n_old))
+round(confint, 2)
+# [-2.75, -1.25]
+
+# Q6.
+m_new <- 4; m_old <- 6
+s_new <- 0.5; s_old <- 2
+n_new <- n_old <- 100
+##spsq <- ((n_new - 1) * s_new ^ 2 + (n_old - 1) * s_old ^ 2) / (n_new + n_old - 2)
+spsq <- s_new ^ 2 / n_new + s_old ^ 2 / n_old
+##confint <- m_old - m_new + c(-1, 1) * qnorm(.975) * sqrt(spsq * (1/n_new + 1/n_old))
+confint <- m_old - m_new + c(-1, 1) * qnorm(.975) * sqrt(spsq)
+round(confint, 2)
+
+# Q7.
+n1 <- n2 <- 9
+x1 <- -3 ## treated
+s1 <- 1.5
+x2 <- 1  # placebo
+s2 <- 1.8
+spsq <- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
+confint <- x1 - x2 + c(-1, 1) * qt(.95, df=n1 + n2 - 2) * sqrt(spsq * (1/n1 + 1/n2))
+round(confint,3)
+# [-5.364, -2.636]
+
+#---------------------------------------------
+## Week 4
+#---------------------------------------------
+## - Exercises
+## -- Power
+# 5. Recall this problem “Suppose that in an AB test, one advertising scheme led to an average of 10 purchases per day for a sample of 100 days,
+## while the other led to 11 purchases per day, also for a sample of 100 days. Assuming a common standard deviation of 4 purchases per day.”
+## Assuming that 10 purchases per day is a benchmark null value, that days are iid and that the standard deviation is 4 purchases for day.
+## Suppose that you plan on sampling 100 days.
+## What would be the power for a one sided 5% Z mean test that purchases per day have increased under the alternative of \mu = 11 purchase per day?
+power.t.test(n=100, delta=1, sd=4, type="one.sample", alt="one.side")
+power <- pnorm(10+qnorm(.95)*.4, mean=11, sd=.4, lower.tail=FALSE)
+
+# 6. Researchers would like to conduct a study of healthy adults to detect a four year mean brain volume loss of .01 mm3.
+## Assume that the standard deviation of four year volume loss in this population is .04 mm3.
+## What is necessary sample size for the study for a 5% one sided test versus a null hypothesis of no volume loss to achieve 80% power?
+n <- (qnorm(.95)+qnorm(.8))^2*.04^2/.01^2
+# n = (z.95 + z.8)^2 * s^2 / .01^2
+
+# You believe the coin that you're flipping is biased towards heads. You get 55 heads out of 100 flips.
+## 1. What's the exact relevant pvalue to 4 decimal places (expressed as a proportion)?
+round(pbinom(54, prob=.5, size=100, lower.tail=FALSE), 4)
+## 2. Would you reject a 1 sided hypothesis at α=.05? (0 for no 1 for yes)?
+# No, coz 0.1841 > 5%
+
+# A web site was monitored for a year and it received 520 hits per day.
+## In the first 30 days in the next year, the site received 15,800 hits.
+## Assuming that web hits are Poisson.
+## 1. Give an exact one sided P-value to the hypothesis that web hits are up this year over last to four significant digits (expressed as a proportion).
+round(ppois(15800-1, 520*30, lower.tail=FALSE), 4)
+## 2. Does the one sided test reject (0 for no 1 for yes)?
+## No, 0.553 > 5%
+
+# Consider the mtcars data set.
+## 1. Give the p-value for a t-test comparing MPG for 6 and 8 cylinder cars assuming equal variance, as a proportion to 3 decimal places.
+data(mtcars)
+g8 <- mtcars$mpg[mtcars$cyl==8]; g6 <- mtcars$mpg[mtcars$cyl==6]
+n8 <- length(g8); n6 <- length(g6)
+m8 <- mean(g8); s8 <- sd(g8); m6 <- mean(g6); s6 <- sd(g6)
+t.test(g8, g6, paired=FALSE, alternative="two.sided", var.equal=TRUE)
+##p-value = 0.0002947
+## 3. Give the common standard deviation estimate for MPG across cylinders to 3 decimal places.
+mixprob <- (n8-1) / (n8+n6-2)
+s <- sqrt(mixprob * s8^2 + (1-mixprob) * s6^2)
+## 2. Give the associated P-value for a z test.
+z <- (m8-m6) / (s*sqrt(1/n8+1/n6))
+pz <- 2*pnorm(-abs(z))
+## 4. Would the t test reject at the two sided 0.05 level (0 for no 1 for yes)?
+## Yes
+
+#-------------------------
+## - Quiz
+# Q1. A pharmaceutical company is interested in testing a potential blood pressure lowering medication.
+## Their first examination considers only subjects that received the medication at baseline then two weeks later.
+## The data are as follows (SBP in mmHg)
+## Consider testing the hypothesis that there was a mean reduction in blood pressure?
+## Give the P-value for the associated two sided T test. (Hint, consider that the observations are paired.)
+g1 <- c(140, 138, 150, 148, 135)
+g2 <- c(132, 135, 151, 146, 130)
+t.test(g2, g1, paired=TRUE, alternative="two.sided", var.equal=TRUE)
+# 0.08652
+
+# Q2. A sample of 9 men yielded a sample average brain volume of 1,100cc and a standard deviation of 30cc.
+## What is the complete set of values of μ0 that a test of H0:μ=μ0
+## would fail to reject the null hypothesis in a two sided 5% Students t-test?
+1100 + c(-1,1)*qt(.975, 8)*30/3
+
+# Q3. Researchers conducted a blind taste test of Coke versus Pepsi.
+## Each of four people was asked which of two blinded drinks given in random order that they preferred.
+## The data was such that 3 of the 4 people chose Coke. Assuming that this sample is representative,
+## report a P-value for a test of the hypothesis that Coke is preferred to Pepsi using a one sided exact test.
+pbinom(2, size=4, prob=.5, lower.tail=FALSE)
+# 0.3125
+
+# Q4. Infection rates at a hospital above 1 infection per 100 person days at risk are believed to be too high and are used as a benchmark.
+## A hospital that had previously been above the benchmark recently had 10 infections over the last 1,787 person days at risk.
+## About what is the one sided P-value for the relevant test of whether the hospital is *below* the standard?
+ppois(10, lambda=0.01*1787, lower.tail=TRUE)
+#0.0324
+
+# Q5. Suppose that 18 obese subjects were randomized, 9 each, to a new diet pill and a placebo.
+## Subjects’ body mass indices (BMIs) were measured at a baseline and again after having received the treatment or placebo for four weeks.
+## The average difference from follow-up to the baseline (followup - baseline) was −3 kg/m2 for the treated group and 1 kg/m2 for the placebo group.
+## The corresponding standard deviations of the differences was 1.5 kg/m2 for the treatment group and 1.8 kg/m2 for the placebo group.
+## Does the change in BMI appear to differ between the treated and placebo groups?
+## Assuming normality of the underlying data and a common population variance, give a pvalue for a two sided t test.
+n1 <- n2 <- 9
+x1 <- -3 ## treated
+s1 <- 1.5
+x2 <- 1  # placebo
+s2 <- 1.8
+spsq <- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
+se <- sqrt(spsq * (1/n1 + 1/n2)) 
+ts <- (x1-x2) / se
+pv <- 2 * pt(ts, 16)
+#0.0001025174
+
+Q6. Brain volumes for 9 men yielded a 90% confidence interval of 1,077 cc to 1,123 cc.
+## Would you reject in a two sided 5% hypothesis test of H0:μ=1,078?
+u1 <- (1077+1123) / 2
+se <- (1123-1077) / 2 / qt(.95, 8)
+ts <- (u1-1078) / se
+pv <- 2 * pt(-ts, 8)
+# 0.113175
+
+Q7. Researchers would like to conduct a study of 100 healthy adults to detect a four year mean brain volume loss of .01 mm3.
+## Assume that the standard deviation of four year volume loss in this population is .04 mm3.
+## About what would be the power of the study for a 5% one sided test versus a null hypothesis of no volume loss?
+power.t.test(n=100, delta=.01, sd=.04, type="one.sample", alt="one.side")
+#0.8
+
+Q8. About what would be the value of n needded for 90% power of type one error rate of 5% one sided test versus a null hypothesis of no volume loss?
+n <- (qnorm(.95)+qnorm(.9))^2*.04^2/.01^2
+#138

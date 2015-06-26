@@ -1,0 +1,123 @@
+---
+title: "Exponential Distribution Simulation"
+author: "Baoshi Sun"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+---
+
+## Overview
+This report is to simulate exponential distribution and investigate the properties of the distribution, such as mean, variance and likelihood of normal distribution. The simulation consists of one thousand collection of means of 40 exponential distributions.
+
+## Simulation
+```{r Simulation}
+lambda <- 0.2
+m_exp <- s_exp <- 1 / lambda; v_exp <- s_exp ^ 2
+set.seed(1234)
+nosim <- 1000; setsize <- 40
+
+exp_mean <- NULL
+for(i in 1:nosim) exp_mean=c(exp_mean, mean(rexp(setsize, lambda)))
+dat <- data.frame(exp_mean)
+
+dat.appr <- data.frame(sqrt(setsize) * (exp_mean - m_exp) / s_exp)
+names(dat.appr) <- c("exp_norm")
+```
+
+With a fixed lambda (`r lambda`), we generated `r nosim` sets of simulation data. In each set, the average of `r setsize` random exponential distributions is produced. We need to convert the vector to data frame for future procedures.  
+
+In order to investigate the likelihood of normal distribution, we also transformed the simulation data into normal distribution manner via formula
+   $$\frac{\sqrt n (\bar X_n - \mu)}{\sigma}$$  
+
+## Distribution Properties
+### Sample mean versus theoretical mean
+```{r prop-mean}
+m_sample <- round(mean(dat$exp_mean), 3)
+m_diff <- m_sample - m_exp
+```
+
+We can tell the sample mean is `r m_sample`, and the difference between the sample mean and the theoretical mean (1/lambda = `r m_exp`) is `r m_diff`.  
+
+```{r plot1, echo=FALSE, fig.width=6, fig.height=4, fig.align='left'}
+library(ggplot2)
+p <- ggplot(data=dat, aes(x=exp_mean))
+p + geom_histogram(alpha=.75, binwidth=.3, aes(fill=..count..)) + 
+    scale_fill_gradient("Count", low="green", high="red") +
+    theme(legend.position='none') + 
+    xlab(paste('Average of', as.character(setsize), 'exponential randoms')) + 
+    ggtitle('Plot 1: Exp. Distribution Property Mean') +
+    geom_vline(xintercept=m_sample, colour="blue", size=0.5) + 
+    geom_vline(xintercept=m_exp, colour="black", size=0.5, linetype="longdash")
+```
+
+On the histogram, the blask-long-dash vertical line and the blue solid vertical line represent the theoretical mean and the sample mean respectively. As can be seen, the two lines are very close, which correspond to the Central Limit Theorem.
+
+### Sample variance versus theoretical variance
+```{r prop-var}
+v_sample <- round(var(dat$exp_mean), 3); s_sample <- round(sd(dat$exp_mean), 3)
+v_est <- round(v_exp / setsize, 3); s_est <- round(s_exp / sqrt(setsize), 3)
+```
+
+By following the sample variance formula, the estimated or theoretical sample variance should be $s^2 / n$ , and sample standard variance should be $s / \sqrt{n}$ .  
+
+Accordingly, the variance of sample is `r v_sample`, as is `r v_est` for the theoretical variance. The standard variances for the simulation and the theory are also needed, whose value is `r s_sample` and `r s_est` respectively.
+
+```{r plot2, echo=FALSE, fig.width=5, fig.height=3, fig.align='center'}
+p <- ggplot(data=dat, aes(x=exp_mean))
+p + geom_density(size=2, alpha=.75, colour="black", fill="lightblue") +
+    xlab(paste('Standerd Variance of', as.character(setsize), 'exponential randoms')) + 
+    ggtitle('Plot 2: Exp. Distribution Property Standard Variance') +
+    geom_vline(xintercept=v_sample, colour="blue", size=0.5) + 
+    geom_vline(xintercept=v_est, colour="black", size=0.5, linetype="longdash")
+```
+
+With the size of 40 in each sample, the standard variance of sample (blue line) is quite close to the theoretical one (black long dash). 
+
+### Likelihood of normal distribution
+```{r, echo=FALSE, fig.width=6, fig.height=4, fig.align='center'}
+p <- ggplot(data=dat.appr, aes(x=exp_norm))
+p+geom_histogram(aes(y=..density.., fill=..density..), alpha=.75, binwidth=.3) +         
+    scale_fill_gradient("density", low="green", high="red") +
+    theme(legend.position='none') + 
+    ggtitle('Plot 3: Similarity of Exp. Distribution and normal distribution') +
+    geom_density(size = 1, colour = "black") +
+    stat_function(fun=dnorm, colour="blue")
+```
+
+The blue curve in above plot stands for normal distribution. And the black curve, which is fairly coincided with the blue one, belongs to the exponential distribution. Therefore, it can be concluded that the distribute is approximately normal.
+
+
+## Appendix: code for plots
+### Plot 1: Exp. Distribution Property Mean
+```{r, echo=TRUE, results="hide"}
+p <- ggplot(data=dat, aes(x=exp_mean)) +
+    geom_histogram(alpha=.75, binwidth=.3, aes(fill=..count..)) + 
+    scale_fill_gradient("Count", low="green", high="red") +
+    theme(legend.position='none') + 
+    xlab(paste('Average of', as.character(setsize), 'exponential randoms')) + 
+    ggtitle('Exp. Distribution Property Mean') +
+    geom_vline(xintercept=m_sample, colour="blue", size=0.5) + 
+    geom_vline(xintercept=m_exp, colour="black", size=0.5, linetype="longdash")
+```
+
+### Plot 2: Exp. Distribution Property Mean
+```{r, echo=TRUE, results="hide"}
+p <- ggplot(data=dat, aes(x=exp_mean)) +
+    geom_density(size=2, alpha=.75, colour="black", fill="lightblue") +
+    xlab(paste('Standerd Variance of', as.character(setsize), 'exponential randoms')) + 
+    ggtitle('Plot 2: Exp. Distribution Property Standard Variance') +
+    geom_vline(xintercept=v_sample, colour="blue", size=0.5) + 
+    geom_vline(xintercept=v_est, colour="black", size=0.5, linetype="longdash")
+```
+
+### Plot 3: Exp. Distribution Property Mean
+```{r, echo=TRUE, results="hide"}
+p <- ggplot(data=dat.appr, aes(x=exp_norm)) +
+    geom_histogram(aes(y=..density.., fill=..density..), alpha=.75, binwidth=.3) +         
+    scale_fill_gradient("density", low="green", high="red") +
+    theme(legend.position='none') + 
+    ggtitle('Plot 3: Similarity of Exp. Distribution and normal distribution') +
+    geom_density(size = 1, colour = "black") +
+    stat_function(fun=dnorm, colour="blue")
+```
