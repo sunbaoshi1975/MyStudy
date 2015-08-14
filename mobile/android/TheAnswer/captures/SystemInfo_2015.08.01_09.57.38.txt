@@ -1,0 +1,76 @@
+AGGREGATED OVER LAST 24 HOURS:
+Per-Package Stats:
+  * course.examples.theanswer / u0a88:
+      * course.examples.theanswer / u0a88:
+               TOTAL: 0.05% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+                 Top: 0.05% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+            (Cached): 0.20% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Summary:
+  * course.examples.theanswer / u0a88:
+           TOTAL: 0.05% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+             Top: 0.05% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+        (Cached): 0.20% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Run time Stats:
+  SOff/Norm: +4h22m31s824ms
+       Mod : +1h22m8s810ms
+       Low : +9m11s113ms
+       Crit: +33m4s893ms
+  SOn /Norm: +2h15m33s731ms
+       Mod : +8m43s943ms
+       Low : +5m16s681ms
+       Crit: +13m17s297ms
+      TOTAL: +9h9m48s292ms
+
+          Start time: 2015-07-29 21:58:00
+  Total elapsed time: +23h37m22s486ms (partial) libdvm.so chromeview
+
+AGGREGATED OVER LAST 3 HOURS:
+Per-Package Stats:
+  * course.examples.theanswer / u0a88:
+      * course.examples.theanswer / u0a88:
+               TOTAL: 0.12% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+                 Top: 0.12% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+            (Cached): 0.45% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Summary:
+  * course.examples.theanswer / u0a88:
+           TOTAL: 0.12% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+             Top: 0.12% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+        (Cached): 0.45% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Run time Stats:
+  SOff/Norm: +1h56m46s831ms
+       Mod : +2m50s217ms
+       Low : +6s518ms
+       Crit: +13s80ms
+  SOn /Norm: +1h57m25s362ms
+       Mod : +1m44s350ms
+       Low : +1m35s90ms
+       Crit: +7m3s759ms
+      TOTAL: +4h7m45s207ms
+
+          Start time: 2015-07-31 17:37:38
+  Total elapsed time: +4h19m58s827ms (partial) libdvm.so chromeview
+
+CURRENT STATS:
+Per-Package Stats:
+  * course.examples.theanswer / u0a88:
+      * course.examples.theanswer / u0a88:
+               TOTAL: 0.44% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+                 Top: 0.44% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+            (Cached): 1.7% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Summary:
+  * course.examples.theanswer / u0a88:
+           TOTAL: 0.44% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+             Top: 0.44% (4.2MB-4.2MB-4.2MB/2.9MB-2.9MB-2.9MB over 1)
+        (Cached): 1.7% (4.4MB-4.4MB-4.4MB/3.1MB-3.1MB-3.1MB over 1)
+
+Run time Stats:
+  SOn /Norm: +1h4m36s91ms (running)
+      TOTAL: +1h4m36s91ms
+
+          Start time: 2015-07-31 20:53:00
+  Total elapsed time: +1h4m37s889ms (partial) libdvm.so chromeview

@@ -1,0 +1,65 @@
+Applications Graphics Acceleration Info:
+Uptime: 25826669 Realtime: 26560277
+
+** Graphics info for pid 26906 [course.examples.theanswer] **
+
+Recent DisplayList operations
+SetupShader
+DrawRect
+ResetShader
+DrawDisplayList
+  Save
+  ClipRect
+  DrawDisplayList
+    DrawPatch
+    Save
+    ClipRect
+    DrawDisplayList
+      Save
+      ClipRect
+      SetupShadow
+      DrawText
+      ResetShadow
+      RestoreToCount
+    RestoreToCount
+  DrawDisplayList
+    DrawDisplayList
+      DrawDisplayList
+        Save
+        ClipRect
+        DrawText
+        DrawText
+        RestoreToCount
+  RestoreToCount
+DrawRect
+DrawPatch
+DrawText
+multiDraw
+  DrawText
+
+Caches:
+Current memory usage / total memory usage (bytes):
+  TextureCache                0 / 25165824
+  LayerCache                  0 / 16777216
+  RenderBufferCache           0 /  2097152
+  GradientCache               0 /   524288
+  PathCache                   0 / 10485760
+  TextDropShadowCache      1200 /  2097152
+  PatchCache                192 /   131072
+  FontRenderer 0 A8      524288 /   524288
+  FontRenderer 0 RGBA         0 /        0
+  FontRenderer 0 total   524288 /   524288
+Other:
+  FboCache                    0 /       16
+Total memory usage:
+  525680 bytes, 0.50 MB
+
+Profile data in ms:
+
+View hierarchy:
+
+
+Total ViewRootImpl: 0
+Total Views:        0
+Total DisplayList:  0.00 kB
+
