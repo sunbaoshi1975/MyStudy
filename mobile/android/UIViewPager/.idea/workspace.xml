@@ -154,7 +154,15 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="47" column="29" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+                <element signature="e#691#692#0" expanded="false" />
+                <element signature="e#721#722#0" expanded="false" />
+                <element signature="e#809#810#0" expanded="false" />
+                <element signature="e#846#847#0" expanded="false" />
+                <element signature="e#991#992#0" expanded="false" />
+                <element signature="e#1028#1029#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -164,7 +172,11 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="34" column="33" selection-start-line="34" selection-start-column="20" selection-end-line="34" selection-end-column="33" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+                <element signature="e#800#1451#0" expanded="false" />
+                <element signature="e#1450#1451#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -1587,7 +1599,7 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1358" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1382" />
     <option name="height" value="744" />
@@ -1813,6 +1825,9 @@
     </configuration>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="3dbbf54e-9199-4e78-a92e-e502ef421841" name="Default" comment="" />
@@ -1823,7 +1838,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1358" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1854,6 +1869,14 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -2047,7 +2070,15 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="29" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#691#692#0" expanded="false" />
+            <element signature="e#721#722#0" expanded="false" />
+            <element signature="e#809#810#0" expanded="false" />
+            <element signature="e#846#847#0" expanded="false" />
+            <element signature="e#991#992#0" expanded="false" />
+            <element signature="e#1028#1029#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2055,7 +2086,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="34" column="33" selection-start-line="34" selection-start-column="20" selection-end-line="34" selection-end-column="33" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#800#1451#0" expanded="false" />
+            <element signature="e#1450#1451#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

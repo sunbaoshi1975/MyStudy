@@ -1,0 +1,146 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:baselineAligned="false"
+              android:orientation="vertical"
+              android:id="@+id/main_linelayout">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/top_frame_container"
+        android:layout_weight="20">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/top_shape_container">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/left_shape_container"
+                android:layout_weight="3"
+                android:layout_margin="3dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/shape_left_1"
+                    android:layout_weight="1"
+                    android:background="#0080ff"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView"
+                    android:layout_weight="0"
+                    android:background="#000080ff"
+                    android:height="4dp"
+                    android:hapticFeedbackEnabled="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/shape_left_2"
+                    android:layout_weight="1"
+                    android:background="#ff0080"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:id="@+id/right_shape_container"
+                android:layout_weight="4"
+                android:layout_margin="3dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/shape_right_1"
+                    android:layout_weight="1"
+                    android:background="#800000"
+                    android:autoText="false"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView2"
+                    android:layout_weight="0"
+                    android:background="#000080ff"
+                    android:height="4dp"
+                    android:hapticFeedbackEnabled="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/shape_right_2"
+                    android:layout_weight="1"
+                    android:background="#ffffff"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView3"
+                    android:layout_weight="0"
+                    android:background="#000080ff"
+                    android:height="4dp"
+                    android:hapticFeedbackEnabled="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/shape_right_3"
+                    android:layout_weight="1"
+                    android:background="#0000ff"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:id="@+id/bottom_frame_container"
+        android:layout_weight="1"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:padding="0dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp">
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/seekBarColor"
+            android:layout_gravity="center_horizontal|top"
+            android:minHeight="8dp"
+            android:max="255"
+            android:isScrollContainer="false"
+            android:fitsSystemWindows="false"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fadeScrollbars="false"
+            android:clickable="true"
+            android:scrollbarStyle="insideOverlay"
+            android:maxHeight="12dp"/>
+    </FrameLayout>
+</LinearLayout>
+
