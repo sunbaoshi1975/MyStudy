@@ -4,4 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_information">More Information</string>
+    <string name="btn_not_now">Not Now</string>
+    <string name="btn_visit_url">Visit MOMA</string>
+    <string name="msg_dialog_visit_moma">Inspired by Modern Art masters such as\n   Piet Mondrian and Ben Nicholson\n\nClick below to learn more!</string>
 </resources>
