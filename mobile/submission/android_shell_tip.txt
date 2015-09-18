@@ -1,0 +1,24 @@
+-- http://developer.android.com/tools/devices/emulator.html#sms
+telnet localhost 5556
+
+-- change network speed slow/fast
+network speed edge
+network speed full
+
+-- change battery level
+power capacity 95
+power status not-charging
+
+-- make call
+gsm call 4168330588
+gsm accept 4168330588
+
+-- send SMS
+sms send 4168330588 "test message"
+
+-- set geo-location
+geo fix -77.04 38.897
+
+-- list dynamic and static broadcast receivers
+adb shell dumpsys activity b
+adb shell dumpsys package
