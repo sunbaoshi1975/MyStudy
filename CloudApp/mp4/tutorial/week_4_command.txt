@@ -1,0 +1,13 @@
+bash ~/start_hbase.sh
+service hbase-starter restart
+
+rm –rf *.class
+export CLASSPATH=$(hbase classpath)
+javac CreateTable.java
+java CreateTable
+
+hbase shell
+> disable ‘emp’
+> drop ‘emp’
+> exit
+
