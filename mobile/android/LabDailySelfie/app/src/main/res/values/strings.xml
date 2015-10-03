@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DailySelfie</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_take_pic">take picture</string>
+    <string name="thumbnail_string">Thumbnail</string>
+</resources>
