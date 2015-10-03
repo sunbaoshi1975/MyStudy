@@ -22,3 +22,7 @@ geo fix -77.04 38.897
 -- list dynamic and static broadcast receivers
 adb shell dumpsys activity b
 adb shell dumpsys package
+
+-- SQLite
+adb -s emulator-[nnnn] shell
+sqlite3 /data/data/[package]/databases/[table]
