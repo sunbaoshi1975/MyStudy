@@ -1,6 +1,7 @@
 package ca.xlight.labdailyselfie;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,12 +9,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
  * Created by sunboss on 10/1/2015.
  */
 public class PictureViewAdapter extends BaseAdapter {
+    private static final String TAG = "Lab-DailySelfie";
     private ArrayList<PictureRecord> list = new ArrayList<PictureRecord>();
     private static LayoutInflater inflater = null;
     private Context mContext;
@@ -75,6 +78,16 @@ public class PictureViewAdapter extends BaseAdapter {
     }
 
     public void delete(int position) {
+        // delete file
+        PictureRecord curr = list.get(position);
+        String filePath = curr.getFileName();
+        File storageDir = new File(filePath);
+        Log.d(TAG, "will delete file: " + filePath);
+        if (storageDir.exists()) {
+            storageDir.delete();
+        }
+
+        // romeve item from list
         list.remove(position);
         notifyDataSetChanged();
     }
@@ -84,7 +97,20 @@ public class PictureViewAdapter extends BaseAdapter {
     }
 
     public void removeAllViews() {
+        deleteAllFilesRecursive(new File(MainActivity.picsDir));
         list.clear();
         this.notifyDataSetChanged();
+    }
+
+    private void deleteAllFilesRecursive(File fileOrDirectory) {
+        if(fileOrDirectory.isDirectory()) {
+            for(File child : fileOrDirectory.listFiles()) {
+                deleteAllFilesRecursive(child);
+            }
+        }
+        else {
+            Log.d(TAG, "will delete file: " + fileOrDirectory.getPath());
+            fileOrDirectory.delete();
+        }
     }
 }

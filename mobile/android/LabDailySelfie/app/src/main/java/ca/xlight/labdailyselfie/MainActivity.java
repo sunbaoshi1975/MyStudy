@@ -38,6 +38,9 @@ public class MainActivity extends ListActivity {
     private static final long TWO_MINS = 2 * 60 * 1000;     // two minutes
     static final int REQUEST_TAKE_PHOTO = 1;
 
+    public static final String picsDir = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES) + "/DailySelfie";
+
     private PictureViewAdapter mAdapter;
     private String mCurrentPhotoPath;
     private String mCurrentPhotoTimeStamp;
@@ -140,6 +143,9 @@ public class MainActivity extends ListActivity {
         if (id == R.id.action_take_pic) {
             dispatchTakePictureIntent();
             return true;
+        } else if (id == R.id.action_delete_all_pic) {
+            deleteAllPictures();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -157,7 +163,7 @@ public class MainActivity extends ListActivity {
                 Log.i(TAG, "Add record: " + mCurrentPhotoPath);
                 AddOneRecord(bitmap, mCurrentPhotoPath, mCurrentPhotoTimeStamp);
                 AppendSharedPreference(mCurrentPhotoPath, mCurrentPhotoTimeStamp);
-                //galleryAddPic();
+                galleryAddPic();
                 mCurrentPhotoPath = null;
             }
         }
@@ -223,10 +229,12 @@ public class MainActivity extends ListActivity {
         //if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
         //    storageDir = getCacheDir();
         //} else {
-        //    storageDir = Environment.getExternalStoragePublicDirectory(
-        //            Environment.DIRECTORY_PICTURES);
+            storageDir = new File (MainActivity.picsDir);
+            storageDir.mkdirs();
+            //storageDir = Environment.getExternalStoragePublicDirectory(
+            //        Environment.DIRECTORY_PICTURES);
         //}
-        storageDir = getExternalCacheDir();
+        //storageDir = getExternalCacheDir();
         //Toast.makeText(MainActivity.this, "External file: " + storageDir, Toast.LENGTH_LONG).show();
 
         File image = File.createTempFile(
@@ -299,4 +307,29 @@ public class MainActivity extends ListActivity {
 
         return bitmap;
     }
+
+    private void deleteAllPictures() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.dialog_delete_all_pictures));
+        builder.setPositiveButton(getString(R.string.dialog_yes), dialogDeleteAllSelfiesClickListener);
+        builder.setNegativeButton(getString(R.string.dialog_no), dialogDeleteAllSelfiesClickListener).show();
+    }
+
+    DialogInterface.OnClickListener dialogDeleteAllSelfiesClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+
+                    mAdapter.removeAllViews();
+                    UpdateSharedPreferences();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        }
+    };
 }

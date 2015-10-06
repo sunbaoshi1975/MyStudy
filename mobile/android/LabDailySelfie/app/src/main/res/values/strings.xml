@@ -3,5 +3,9 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_take_pic">take picture</string>
+    <string name="action_delete_all_pic">delete all</string>
+    <string name="dialog_delete_all_pictures">Are you sure you want to delete all pictures?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
     <string name="thumbnail_string">Thumbnail</string>
 </resources>
