@@ -1,0 +1,168 @@
+---
+title: "Cloud Computing Capstone Task I"
+author: "Baoshi Sun"
+date: "February 1, 2016"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+fontsize: 11pt
+---
+
+Give a brief overview of how you extracted and cleaned the data.
+Give a brief overview of how you integrated each system.
+What approaches and algorithms did you use to answer each question?
+What are the results of each question? Use only the provided subset for questions from Group 2 and Question 3.2.
+What system- or application-level optimizations (if any) did you employ?
+Your opinion about whether the results make sense and are useful in any way.
+
+```{r setOptions, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r loadLibs, echo=FALSE, results='hide', include=FALSE}
+# Notes: if fail to load library, use install.packages("Package Name") to download and install it first.
+library("dplyr")
+```
+
+## System Environment
+### AWS Resources
+-- Instance: 3  m4.xlarge EC2 instances  
+-- Volume: total usage 75G, including 3 20G EBS volumes for EC2 instances and 1 15G volume for transportation data.  
+
+### Hadoop Cluster
+A 3-nodes cluster is setup, with one name node and two data nodes. The version of Hadoop is 2.7.1.   
+
+### Cassandra Cluster
+The Cassandra cluster has 3 nodes too, which coexist with Hadoop hosts. And 2.1 is Cassandra's version.  
+
+## Data Preprocessing
+### Data Loading
+The source transportation data is a AWS public dataset snapshot. The following steps were performed to load the data into our master node.  
+-- Create a 15G volume and import the AWS snapshot  
+-- Mount the data volume to the master node with the path of $HOME/rawdata  
+
+### Data Cleaning
+As the rawdata are packed into zip files and we only need a small portion of them (on time data in aviation folder), data extraction and cleaning should be conducted before data analysis. 
+-- A couple of shell scripts are programmed and used to extra zip files and put the cleaned data files into HDFS  
+-- A tiny Python snippet is written to do data cleaning.  
+The idea is to keep only a few columns from the input file, and write it slimmed file into a temporary CSV file. A shell program will move the temporary CSV file to HDFS. These are selected columns:  
+FlightDate(5), AirlineID(7), Carrier(8), FlightNum(10), Origin(11), Dest(17), CRSDepTime(23), DepTime(24), DepDelay(25), CRSArrTime(34), ArrTime(35), ArrDelay(36), Cancelled(41)
+
+After the cleanliness, the total size of data in 122 files is less than 6GB s.
+
+## Methodology
+### Map Reduce
+Java programs are coded to perform the Map-reduce processes, just as what I learned from the cloud application course. Furthermore, the algorithms for some questions are a bit complex. For example, the secondary sorting algorithm is used to solve question 2.1 to 2.3. 
+
+### Cassandra Operation
+CQL is employed to manipulate Cassandra data and execute query. The calculation results of Map-reduce are also imported into Cassandra by using CQL.  
+
+### Plotting
+For Question 3.1, a few simple plots may be a good way for exploratory analysis. R studio is employed in this case. And this writeup is also produced in R studio. 
+
+## Task Execution
+Concretely, approach and algorithm for each question differentiate slightly. Question 1.1 and 1.2 are basic sorting Map-reduce process. Two steps of MR are used. The first MR does the counting and partially filtering and the the second MR fulfill the global sorting. 
+
+As for group 2 questions (2.1 to 2.3), the the secondary sorting algorithm is employed. The keys for the two MR steps are modified accordingly. For example, in question 2.1 the first MR uses "Origin"+"Carrier" as the key and calculates the ontime rate, while the second MR uses only "Origin" as key, but the ontime rate is used as the sorting criteria. We should notice as well that there are a lot of options to calculate the ontime rate. The algorithm will of course effect the outputs. In this job, the algorithm can be described as:  
+-- Only Cancel and delay larger than 15 minutes is considered as "late". Early and delay less than 15 minutes are looked on as "normal".  
+-- Count the times of "late" and "normal". In this case, delay for 20 minutes and delay for 60 minutes are both mark as 1 time of "late" and hence contribute the same to the scoring.  
+-- the ontime rate = normal times / (normal times + later times)  
+
+Question 3.1 is almost the same as Question 1.1 except that Question 3.1 requires to get the ranking of all airports. So the same program is used with set in "top N" parameter to 0 (unlimited). The focus of Question 3.1 is to observe and analyze the distribution of airport ranks versus their popularity. Considering this is not a statistical inference project, only very simple plotting method is used rather than various diagnostic tests.  
+
+Compared with previous questions, Question 3.2 requires much more data processing as well as a little bit tricks. Finally, the calculation finished in 10 minutes with more than 56M output records. But it took about 50 minutes to transfer the result to Cassandra. The program also consists of two MR processes. In the first MR, data are decomposed into two types of units, one for the in-leg, the other for the out-leg, and both have the key formatted as (original,dest,date,flag), where flag = "0" stands for in-leg and "1" is for out-leg. During this stage, only data of 2008 are inputted and the flights with departure time before 12:00pm are marked as in-leg, and those after 12:00pm drop to out-leg group. In addition, only the record with the minimum departure delay is kept for each key. In the second MR, the key changes to (dest,date) and (original,date-2) for in-leg and out-leg respectively. Then, we can connect the both legs from the point of view of the mid-way airport and work out all routes.
+
+## Results Report
+![Video](https://youtu.be/cdH61fUiDh8)
+### Question 1.1
+### Question 1.2
+
+```{r}
+a1 <- data.frame(read.csv("a1.csv", header=FALSE, sep="\t"))
+colnames(a1) <- c("Airport", "Score")
+a2 <- data.frame(read.csv("a2.csv", header=FALSE, sep="\t"))
+colnames(a2) <- c("Airline", "Score")
+a1 <- arrange(a1,  desc(Score))
+a2 <- arrange(a2,  desc(Score))
+output <- cbind(a1, a2)
+output
+```
+
+
+### Question 2.1
+-- CMI: OH(87.09%),EV(83.33%),DH(82.65%),MQ(79.28%)  
+-- BWI: F9(92.84%),CO(89.60%),AA(84.72%),YV(84.71%),UA(84.42%),NW(84.27%),DL(83.33%),9E(83.27%),TW(83.11%),FL(82.50%)  
+-- MIA: 9E(100.00%),RU(91.30%),EV(88.84%),XE(88.04%),TZ(87.83%),NW(87.47%),US(84.80%),UA(84.24%),CO(83.28%),HP(82.36%)  
+-- LAX: HA(90.89%),RU(90.38%),TZ(89.01%),MQ(88.27%),OO(87.77%),US(87.33%),NW(87.19%),CO(86.27%),FL(86.18%),YV(85.14%)  
+-- IAH: NW(89.84%),RU(87.68%),TW(87.06%),WN(86.43%),OO(85.55%),F9(85.14%),US(84.91%),AA(84.17%),CO(84.17%),DL(83.97%)  
+-- SFO: TZ(88.56%),HA(87.40%),DH(87.02%),NW(86.26%),US(85.94%),DL(85.53%),CO(84.57%),F9(82.86%),MQ(81.66%),AA(80.88%)  
+
+The numbers enclosed in parentheses are on-time rate of the carries. 
+
+### Question 2.2
+-- CMI: ABI(100.00%),DFW(88.67%),CVG(86.06%),ATL(83.33%),ORD(78.51%)  
+-- BWI: SAV(100.00%),RIC(100.00%),SRQ(91.17%),IAH(89.71%),SJU(89.11%),DAB(86.89%),LIT(86.83%),SFO(86.21%),CVG(86.14%),RSW(85.81%)  
+-- MIA: SAT(100.00%),BUF(100.00%),SWF(100.00%),PBI(100.00%),DAY(90.91%),SLC(90.53%),MEM(87.39%),EGE(87.37%),IAH(86.25%),PIT(85.70%)  
+-- LAX: IDA(100.00%),BZN(100.00%),SDF(100.00%),RSW(100.00%),PMD(100.00%),PIH(100.00%),DRO(100.00%),VIS(95.48%),MEM(92.55%),IYK(90.25%)  
+-- IAH: PIH(100.00%),MSN(100.00%),MLI(100.00%),AGS(95.36%),RNO(91.18%),JAC(90.59%),GUC(90.12%),EFD(89.99%),OGG(89.62%),MTJ(89.37%)  
+-- SFO: SDF(100.00%),FAR(100.00%),MSO(100.00%),OAK(100.00%),ELP(100.00%),PIH(100.00%),LGA(96.97%),PIE(96.53%),LGB(92.59%),MEM(89.99%)  
+
+The numbers enclosed in parentheses are on-time rate of the airport. 
+
+### Question 2.3
+-- CMI -> ORD: MQ(73.62%)  
+-- IND -> CMH:  
+-- DFW -> IAH: CO(83.61%),DL(83.03%),RU(82.15%),OO(80.50%),EV(79.37%),XE(79.33%),AA(76.15%),MQ(72.83%)  
+-- LAX -> SFO: OO(98.28%),TZ(90.48%),F9(86.70%),US(80.00%),MQ(78.47%),EV(75.76%),WN(73.95%),AA(72.58%),XE(70.90%),DL(70.75%)  
+-- JFK -> LAX: B6(100.00%),UA(77.74%),TW(75.60%),HP(73.99%),AA(71.70%),DL(70.61%)  
+-- ATL -> PHX: FL(77.77%),US(76.10%),HP(76.03%),DL(74.42%)  
+
+### Question 3.1
+```{r}
+par(mfrow=c(1,2))
+
+df <- data.frame(read.csv("c1.csv", header=FALSE, sep="\t"))
+colnames(df) <- c("Airport", "flights")
+df <- arrange(df,  desc(flights))
+df <- mutate(df, rank=row_number())
+
+plot(df$flights, df$rank, main="Airport Popularity Distribution", xlab="Flights", ylab="Rank", col="blue")
+plot(log(df$flights), log(df$rank)^-1, main="Airport Popularity Distribution", xlab="log(Flights)", ylab="log(Rank)", col="blue")
+```
+
+From the plots, we can't determine it is a zip-f distribution. But it more likes some exponential distribution.
+
+
+### Question 3.2
+-- Query: CMI -> ORD -> LAX, 04/03/2008  
+-- Result: MQ4278,0710,-14,AA607,1952,-24  
+The result indicates the route is taking MQ4278 which departures at 07:10 on 04/03/2008 from CMI with 14 minutes earlier than the schedule, and taking AA607 at 19:52 on 06/03/2008 from ORD to LAX with 24 minutes earlier.
+
+-- Query: JAX -> DFW -> CRP, 09/09/2008  
+-- Result: AA845,0722,1,MQ3627,1648,-7  
+
+-- Query: SLC -> BFL -> LAX, 01/04/2008  
+-- Result: OO3755,1101,12,OO5429,1509,6  
+
+-- Query: LAX -> SFO -> PHX, 12/07/2008  
+-- Result: WN3534,0650,-13,US412,1916,-19  
+
+-- Query: DFW -> ORD -> DFW, 10/06/2008  
+-- Result: UA1104,0658,-21,AA2341,1650,-10  
+
+-- Query: LAX -> ORD -> JFK, 01/01/2008  
+-- Result: UA944,0700,1,B6918,1853,-7  
+
+
+## Optimizations
+### Applied Optimizations
+-- The procedure of data extraction and cleaning is performed automatically by the combination usage of Python and Shell scripts. In addition, no extra storage is required, only one ephemeral intermediate file is used. 
+
+### Future Works
+-- Data extraction and cleaning can be executed by multiple processes or threads, which can significantly reduce the processing time.  
+-- Automation of data transforming from HDFS to Cassandra can be implemented. There are a couple of options. For example, some code can be added and executed after the Reduce procedure is finished. I also tried the integration of PIG and Cassandra by using CNativeStorage library, unfortunately, I didn't figure it out. Will try it later.    
+-- Initially, I wanted to try R-Hadoop and spend a few days on configuration. Then, I turned back to the traditional method as soon as I realized I may not have enough time. I'd like to continue the R-Hadoop trajectory shortly after. 
+
+## Conclusions
+This is a well designed could computing and big data processing exercise. The results and practice can be mapped to many fields. 

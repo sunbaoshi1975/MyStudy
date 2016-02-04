@@ -1,0 +1,70 @@
+# prepare: 10967295
+mkdir build
+bash start.sh
+
+# clean local
+rm -rf ./build/* ./TitleCount.jar
+
+# complie
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TitleCount.java -d build
+jar -cvf TitleCount.jar -C build/ ./
+
+# clean hadoop
+hadoop fs -rm -r /mp2/A-output
+
+# run
+hadoop jar TitleCount.jar TitleCount -D stopwords=/mp2/misc/stopwords.txt -D delimiters=/mp2/misc/delimiters.txt /mp2/titles /mp2/A-output
+
+# view & get result
+hadoop fs -cat /mp2/A-output/part*
+hadoop fs -cat /mp2/A-output/part* | sort -n -k2 -r | head -n 10
+hadoop fs -get /mp2/A-output/part* .
+
+# check Hadoop log
+yarn logs -applicationId application_1441239124625_0048
+
+## Task B
+rm -rf ./build/* ./TopTitles.jar
+hadoop fs -rm -r /mp2/B-output
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopTitles.java -d build
+jar -cvf TopTitles.jar -C build/ ./
+hadoop jar TopTitles.jar TopTitles -D stopwords=/mp2/misc/stopwords.txt -D delimiters=/mp2/misc/delimiters.txt -D N=5 /mp2/titles /mp2/B-output
+hadoop fs -cat /mp2/B-output/part*
+
+## Task C
+rm -rf ./build/* ./TopTitleStatistics.jar
+hadoop fs -rm -r /mp2/C-output
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopTitleStatistics.java -d build
+jar -cvf TopTitleStatistics.jar -C build/ ./
+hadoop jar TopTitleStatistics.jar TopTitleStatistics -D stopwords=/mp2/misc/stopwords.txt -D delimiters=/mp2/misc/delimiters.txt -D N=5 /mp2/titles /mp2/C-output
+hadoop fs -cat /mp2/C-output/part*
+
+## Task D
+rm -rf ./build/* ./OrphanPages.jar
+hadoop fs -rm -r /mp2/D-output
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main OrphanPages.java -d build
+jar -cvf OrphanPages.jar -C build/ ./
+hadoop jar OrphanPages.jar OrphanPages /mp2/links /mp2/D-output
+hadoop fs -cat /mp2/D-output/part* | sort -n | head -n 20
+
+## Task E
+rm -rf ./build/* ./TopPopularLinks.jar
+hadoop fs -rm -r /mp2/E-output
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopPopularLinks.java -d build
+jar -cvf TopPopularLinks.jar -C build/ ./
+hadoop jar TopPopularLinks.jar TopPopularLinks -D N=5 /mp2/links /mp2/E-output
+hadoop fs -cat /mp2/E-output/part*
+
+## Task F
+rm -rf ./build/* ./PopularityLeague.jar
+hadoop fs -rm -r /mp2/F-output
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main PopularityLeague.java -d build
+jar -cvf PopularityLeague.jar -C build/ ./
+hadoop jar PopularityLeague.jar PopularityLeague -D league=/mp2/misc/league.txt /mp2/links /mp2/F-output
+hadoop fs -cat /mp2/F-output/part*

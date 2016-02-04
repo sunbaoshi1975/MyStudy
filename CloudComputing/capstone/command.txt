@@ -1,0 +1,105 @@
+## Prepare
+hadoop fs -mkdir -p /output
+mkdir build
+
+## Task a1: top 10 airports
+rm -rf ./build/* ./TopAirports.jar
+hadoop fs -rm -r /output/a1
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopAirports.java -d build
+jar -cvf TopAirports.jar -C build/ ./
+hadoop jar TopAirports.jar TopAirports -D N=10 /data/airline /output/a1
+hadoop fs -cat /output/a1/part*
+
+## Task a2: top 10 ontime arrival airlines
+rm -rf ./build/* ./TopOntimeAirlines.jar
+hadoop fs -rm -r /output/a2
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopOntimeAirlines.java -d build
+jar -cvf TopOntimeAirlines.jar -C build/ ./
+hadoop jar TopOntimeAirlines.jar TopOntimeAirlines -D N=10 /data/airline /output/a2
+hadoop fs -cat /output/a2/part*
+
+## Task b1: top 10 ontime departure carriers for each airport
+rm -rf ./build/* ./TopAirportCarrier.jar
+hadoop fs -rm -r /output/b1
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopAirportCarrier.java -d build
+jar -cvf TopAirportCarrier.jar -C build/ ./
+hadoop jar TopAirportCarrier.jar TopAirportCarrier -D N=10 /data/airline /output/b1
+hadoop fs -cat /output/b1/part*
+
+## Task b2: top 10 ontime departure destination airports from each airport
+rm -rf ./build/* ./TopAirportAirport.jar
+hadoop fs -rm -r /output/b2
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopAirportAirport.java -d build
+jar -cvf TopAirportAirport.jar -C build/ ./
+hadoop jar TopAirportAirport.jar TopAirportAirport -D N=10 /data/airline /output/b2
+hadoop fs -cat /output/b2/part*
+
+## Task b3: top 10 carriers that connect airport X to airport Y in terms of ontime arrival
+rm -rf ./build/* ./TopCarrierConnection.jar
+hadoop fs -rm -r /output/b3
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopCarrierConnection.java -d build
+jar -cvf TopCarrierConnection.jar -C build/ ./
+hadoop jar TopCarrierConnection.jar TopCarrierConnection -D N=10 /data/airline /output/b3
+hadoop fs -cat /output/b3/part*
+
+## Task c1: airports rank vs flights
+rm -rf ./build/* ./TopAirports.jar
+hadoop fs -rm -r /output/c1
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopAirports.java -d build
+jar -cvf TopAirports.jar -C build/ ./
+hadoop jar TopAirports.jar TopAirports -D N=0 /data/airline /output/c1
+hadoop fs -cat /output/c1/part*
+hadoop fs -get /output/c1/part* c1.csv
+
+## Task c2: X->Y->Z the best one hop flights
+rm -rf ./build/* ./TopHopFlights.jar
+hadoop fs -rm -r /output/c2
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+hadoop com.sun.tools.javac.Main TopHopFlights.java -d build
+jar -cvf TopHopFlights.jar -C build/ ./
+hadoop jar TopHopFlights.jar TopHopFlights -D N=1 /data/airline2008 /output/c2
+hadoop fs -cat /output/c2/part*
+hadoop fs -get /output/c2/part* c2.csv
+
+# R
+df <- tbl_df(read.csv("c1.csv", sep="\t", header=FALSE))
+head(df)
+df <- arrange(df, desc(V2))
+names(df) <- c("airport", "flights")
+df <- mutate(df, rank=row_number())
+plot(df$flights, df$rank, main="Airport Popularity Distribution", xlab="Flights", ylab="Rank", col="blue")
+plot(log(df$flights), 1/log(df$rank), main="Airport Popularity Distribution", xlab="log(Flights)", ylab="log(Rank)", col="blue")
+
+install.packages("VGAM")
+library(VGAM)
+
+# http://blog.csdn.net/fenglibing/article/details/9411021
+# http://wiki.apache.org/cassandra/GettingStarted
+cqlsh 54.208.28.141
+CREATE KEYSPACE mykeyspace
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+USE mykeyspace;
+
+CREATE TABLE c2 (route text PRIMARY KEY, flights text);
+COPY c2 FROM 'c2.csv' WITH DELIMITER='\t';
+SELECT count(*) from c2;
+SELECT * from c2 limit 100;
+SELECT * from c2 WHERE route='CMI,ORD,LAX,04/03/2008';
+SELECT * from c2 WHERE route='JAX,DFW,CRP,09/09/2008';
+SELECT * from c2 WHERE route='SLC,BFL,LAX,01/04/2008';
+SELECT * from c2 WHERE route='LAX,SFO,PHX,12/07/2008';
+SELECT * from c2 WHERE route='DFW,ORD,DFW,10/06/2008';
+SELECT * from c2 WHERE route='LAX,ORD,JFK,01/01/2008';
+
+SELECT * from b3 WHERE airport='CMI,ORD';
+SELECT * from b3 WHERE airport='IND,CMH';
+SELECT * from b3 WHERE airport='DFW,IAH';
+SELECT * from b3 WHERE airport='LAX,SFO';
+SELECT * from b3 WHERE airport='JFK,LAX';
+SELECT * from b3 WHERE airport='ATL,PHX';

@@ -1,0 +1,406 @@
+# just notes
+namenode_public_dns => ec2-54-208-28-141.compute-1.amazonaws.com (54.208.28.141) ip-172-31-48-42.ec2.internal (172.31.48.42)
+datanode1_public_dns => ec2-54-164-125-47.compute-1.amazonaws.com (54.164.125.47) ip-172-31-48-43.ec2.internal (172.31.48.43)
+datanode2_public_dns => ec2-54-173-18-1.compute-1.amazonaws.com (54.173.18.1) ip-172-31-48-44.ec2.internal (172.31.48.44)
+
+namenode_public_dns => ec2-52-90-176-143.compute-1.amazonaws.com  ip-172-31-61-89.ec2.internal
+datanode1_public_dns => ec2-52-91-234-75.compute-1.amazonaws.com  ip-172-31-61-90.ec2.internal
+datanode2_public_dns => ec2-52-90-106-51.compute-1.amazonaws.com  ip-172-31-61-87.ec2.internal
+datanode3_public_dns => ec2-52-90-113-144.compute-1.amazonaws.com  ip-172-31-61-88.ec2.internal
+
+#-----------------------------------------------------
+# interconnections
+# copy pem to namenode
+ftp -> datatellit.pem -> ~/.ssh@namenode_public_dns
+namenode$ sudo chmod 600 ~/.ssh/datatellit.pem
+# add config to connect from namenode to other nodes
+namenode$ nano ~/.ssh/config
+Host namenode
+  HostName ec2-54-208-28-141.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/datatellit.pem
+
+Host datanode1
+  HostName ec2-54-164-125-47.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/datatellit.pem
+
+Host datanode2
+  HostName ec2-54-173-18-1.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/datatellit.pem
+
+Host datanode3
+  HostName ip-172-31-61-88.ec2.internal
+  User ubuntu
+  IdentityFile ~/.ssh/datatellit.pem
+
+
+namenode$ ssh-keygen -f ~/.ssh/id_rsa -t rsa -P ""
+namenode$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+namenode$ cat ~/.ssh/id_rsa.pub | ssh datanode1 'cat >> ~/.ssh/authorized_keys'
+namenode$ cat ~/.ssh/id_rsa.pub | ssh datanode2 'cat >> ~/.ssh/authorized_keys'
+namenode$ cat ~/.ssh/id_rsa.pub | ssh datanode3 'cat >> ~/.ssh/authorized_keys'
+
+# check
+ssh ubuntu@ip-172-31-61-90.ec2.internal
+exit
+
+#-----------------------------------------------------
+#Hadoop
+## Install Java
+allnodes$ sudo apt-get update
+allnodes$ sudo apt-get install openjdk-7-jdk
+allnodes$ java -version
+
+## get Hadoop to ~/Downloads and extracting it to the /usr/local
+allnodes$ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz -P ~/Downloads
+allnodes$ sudo tar zxvf ~/Downloads/hadoop-* -C /usr/local
+allnodes$ sudo mv /usr/local/hadoop-* /usr/local/hadoop
+
+## Env Variables to ~/.profile
+allnodes$ nano ~/.profile
+export JAVA_HOME=/usr
+export PATH=$PATH:$JAVA_HOME/bin
+
+export HADOOP_HOME=/usr/local/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin
+
+export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
+export HADOOP_CLASSPATH=/usr/lib/jvm/java-8-oracle/lib/tools.jar
+
+### load env vars
+allnodes$ . ~/.profile
+
+## Hadoop Config
+### Common Config
+allnodes$ sudo nano $HADOOP_CONF_DIR/hadoop-env.sh
+# The java implementation to use.
+export JAVA_HOME=/usr
+
+allnodes$ sudo nano $HADOOP_CONF_DIR/core-site.xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://ec2-54-208-28-141.compute-1.amazonaws.com:9000</value>
+  </property>
+</configuration>
+
+allnodes$ sudo nano $HADOOP_CONF_DIR/yarn-site.xml
+<configuration>
+
+<!-- Site specific YARN configuration properties -->
+
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property> 
+  <property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>ec2-54-208-28-141.compute-1.amazonaws.com</value>
+  </property>
+</configuration>
+
+allnodes$ sudo cp $HADOOP_CONF_DIR/mapred-site.xml.template $HADOOP_CONF_DIR/mapred-site.xml
+allnodes$ sudo nano $HADOOP_CONF_DIR/mapred-site.xml
+<configuration>
+  <property>
+    <name>mapreduce.jobtracker.address</name>
+    <value>ec2-54-208-28-141.compute-1.amazonaws.com:54311</value>
+  </property>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+</configuration>
+
+### Specific Config on NameNode
+allnodes$ echo $(hostname)
+namenode$ sudo nano /etc/hosts
+ec2-54-208-28-141.compute-1.amazonaws.com ip-172-31-48-42
+ec2-54-164-125-47.compute-1.amazonaws.com ip-172-31-48-43
+ec2-54-173-18-1.compute-1.amazonaws.com ip-172-31-48-44
+
+namenode$ sudo nano $HADOOP_CONF_DIR/hdfs-site.xml
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///usr/local/hadoop/hadoop_data/hdfs/namenode</value>
+  </property>
+</configuration>
+
+namenode$ sudo mkdir -p $HADOOP_HOME/hadoop_data/hdfs/namenode
+namenode$ sudo touch $HADOOP_CONF_DIR/masters
+namenode$ sudo nano $HADOOP_CONF_DIR/masters
+ip-172-31-48-42
+
+namenode$ sudo nano $HADOOP_CONF_DIR/slaves
+ip-172-31-48-43
+ip-172-31-48-44
+
+namenode$ sudo chown -R ubuntu $HADOOP_HOME
+
+### Specific Config on DataNode
+sudo nano $HADOOP_CONF_DIR/hdfs-site.xml
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///usr/local/hadoop/hadoop_data/hdfs/datanode</value>
+  </property>
+</configuration>
+
+sudo mkdir -p $HADOOP_HOME/hadoop_data/hdfs/datanode
+sudo chown -R ubuntu $HADOOP_HOME
+
+# Start Hadoop Cluster
+namenode$ hdfs namenode -format
+namenode$ $HADOOP_HOME/sbin/start-dfs.sh
+yes yes yes yes yes
+
+# Check
+http://ec2-54-208-28-141.compute-1.amazonaws.com:50070
+
+# Start YARN
+namenode$ $HADOOP_HOME/sbin/start-yarn.sh
+namenode$ $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
+namenode$ jps
+datanode$ jps
+
+# Check
+http://ec2-54-208-28-141.compute-1.amazonaws.com:8088
+http://ec2-54-208-28-141.compute-1.amazonaws.com:19888
+
+
+#-----------------------------
+# Install Cassandra Cluster
+## Update Java
+allnodes$ sudo add-apt-repository ppa:webupd8team/java
+allnodes$ sudo apt-get update
+allnodes$ sudo apt-get install oracle-java8-installer
+allnodes$ java -version
+allnodes$ sudo apt-get install oracle-java8-set-default
+
+## Install Cassandra
+### Single Site
+allnodes$ sudo nano /etc/apt/sources.list
+# cassandra
+deb http://www.apache.org/dist/cassandra/debian 21x main
+deb-src http://www.apache.org/dist/cassandra/debian 21x main
+
+allnodes$ 
+gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D
+gpg --export --armor F758CE318D77295D | sudo apt-key add -
+gpg --keyserver pgp.mit.edu --recv-keys 2B5C1B00
+gpg --export --armor 2B5C1B00 | sudo apt-key add -
+gpg --keyserver pgp.mit.edu --recv-keys 0353B12C
+gpg --export --armor 0353B12C | sudo apt-key add -
+
+sudo apt-get update
+sudo apt-get install cassandra
+
+ps -aux | grep cassandra
+sudo kill xxxx
+sudo rm -rf /var/lib/cassandra/*
+
+### Configure the Cluster
+namenode$ sudo nano /etc/cassandra/cassandra.yaml
+search: 
+cluster_name: -> DTITCluster
+seeds: -> 172.31.48.42
+listen_address: -> 172.31.48.42
+rpc_address: ->
+
+sudo cassandra &
+
+datanode1$ sudo nano /etc/cassandra/cassandra.yaml
+search: 
+cluster_name: -> DTITCluster
+seeds: -> 172.31.48.42
+listen_address: -> 172.31.48.43
+rpc_address: ->
+
+sudo cassandra &
+
+datanode2$ sudo nano /etc/cassandra/cassandra.yaml
+search: 
+cluster_name: -> DTITCluster
+seeds: -> 172.31.48.42
+listen_address: -> 172.31.48.44
+rpc_address: ->
+
+sudo cassandra &
+
+namenode$ nodetool status
+
+
+$ cat /etc/hosts
+#master
+172.31.27.101 hadoopmaster
+#secondary name node
+172.31.27.100 hadoopsecondnamenode
+#slave 1
+172.31.27.99 slave1
+#slave 2
+172.31.27.98 slave2
+#slave 3
+172.31.24.53 slave3
+#slave 4
+172.31.19.28 slave4
+#cassandra contact points (independent from how many clusters nodes)
+172.31.18.130 cassandra1
+
+#sudo cassandra-cli
+cqlsh 54.208.28.141
+
+Then all the hadoop configuration files you point to these hostnames, for example
+$ cat hadoop/etc/hadoop/slaves
+slave1
+slave2
+slave3
+slave4
+
+
+# attach and mount snapshot volume data
+lsblk
+sudo file -s /dev/xvdf
+sudo mkdir ~/rawdata
+sudo mount /dev/xvdf ~/rawdata
+
+sudo cp /etc/fstab /etc/fstab.orig
+nano /etc/fstab
+/dec/xvdf /rawdata   cdrom    defaults,nofail,nobootwait        0       2
+sudo mount -a
+
+# data
+~/rawdata/aviation/airline_ontime/1998/
+On_Time_On_Time_Performance_1998_1.zip
+
+# Install RHadoop
+sudo nano /etc/apt/sources.list
+# R Packages
+deb http://cran.cnr.berkeley.edu/bin/linux/ubuntu trusty/
+
+codename=$(lsb_release -c -s)
+echo "deb http://cran.cnr.berkeley.edu/bin/linux/ubuntu $codename/" | sudo tee -a /etc/apt/sources.list > /dev/null
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo add-apt-repository ppa:marutter/rdev
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install r-base r-base-dev
+sudo apt-get install r-base-core
+sudo apt-get install r-base-dev
+
+sudo apt-get install gdebi-core
+sudo apt-get install libapparmor1
+
+$ wget http://download2.rstudio.org/rstudio-server-0.98.1102-amd64.deb
+$ sudo gdebi rstudio-server-0.98.1102-amd64.deb
+
+$ sudo rstudio-server verify-installation
+
+sudo adduser rstudio / 1qazxsw2
+
+http://ec2-54-208-28-141.compute-1.amazonaws.com:8787
+
+sudo R CMD javareconf
+
+On RStudio:
+# version must > 3.1
+version
+Sys.setenv(HADOOP_HOME="/usr/local/hadoop")
+Sys.setenv(HADOOP_CMD="/usr/local/hadoop/bin/hadoop")
+Sys.setenv(HADOOP_STREAMING="/usr/local/hadoop/share/hadoop/tools/lib/hadoop-streaming-2.7.1.jar")
+Sys.setenv(HADOOP_CONF_DIR="/usr/local/hadoop/etc/hadoop")
+
+
+install.packages(c("dplyr","R.methodsS3"))
+install.packages(c("Hmisc"))
+install.packages(c("caTools"))
+
+install.packages(c("plyr"), repos="http://cran.r-project.org/")
+install.packages(c("rJava"), dependencies = T, repos="http://cran.r-project.org/")
+install.packages(c("rjson"), repos="http://cran.r-project.org/")
+install.packages(c("reshape2", "functional", "lazyeval"), repos="http://cran.r-project.org/")
+install.packages(c("RJSONIO"), repos="http://cran.r-project.org/")
+install.packages(c("memoise"), repos="http://cran.r-project.org/")
+
+Download:
+https://github.com/RevolutionAnalytics/RHadoop/wiki/Downloads
+http://launchpadlibrarian.net/181962852/r-cran-plyr_1.8.1-2_amd64.deb
+
+# before install rhbase, need to install thrift
+sudo apt-get install libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev ant
+
+sudo wget http://ftp.debian.org/debian/pool/main/a/automake-1.15/automake_1.15-3_all.deb
+sudo dpkg -i automake_1.15-3_all.deb
+
+sudo wget raw(sudo wget https://raw.github.com/RevolutionAnalytics/rhbase/master/build/rhbase_1.2.1.tar.gz)
+rmr, plyrmr, rhdfs, rhbase, revro
+Tools -> Install packages -> package Archive File
+
+
+library(rhdfs)
+hdfs.init()
+
+library(rmr2)
+
+sample<-1:10
+small.ints<-to.dfs(sample)
+out<-mapreduce(input = small.ints, map=function(k,v) keyval(v,v^2))
+from.dfs(out)
+df<-as.data.frame(from.dfs(out))
+print(df)
+
+Year, Month, DayofMonth, DayOfWeek, 
+
+FlightDate(5), AirlineID(7), Carrier(8), FlightNum(10), Origin(11), Dest(17), 
+CRSDepTime(23), DepTime(24), DepDelay(25), 
+CRSArrTime(34), ArrTime(35), ArrDelay(36), Cancelled(41)
+
+hadoop fs -mkdir -p /data/airline
+
+# test
+python ./dataclean.py <input.csv> <output.csv>
+./dataclean.sh 1998
+
+# Clean all data
+./alldata.sh
+
+hadoop fs -ls /data/airline
+ 
+ https://www.safaribooksonline.com/library/view/data-algorithms/9781491906170/ch01.html
+ 
+# install PIG
+wget http://apache.mirror.gtcomm.net/pig/pig-0.15.0/pig-0.15.0.tar.gz
+sudo tar zxvf ~/Downloads/pig-0.15.0.tar.gz -C /usr/local
+sudo nano ~/.profile
+export PIG_HOME=/usr/local/pig-0.15.0
+export PIG_INITIAL_ADDRESS=54.208.28.141
+export PIG_CLASSPATH=${HADOOP_HOME}/etc/hadoop/
+export PIG_RPC_PORT=9160
+export PIG_PARTITIONER=org.apache.cassandra.dht.Murmur3Partitioner
+export PATH=${PIG_HOME}/bin:$PATH
+ . ~/.profile
+ 
+# 
+/etc/cassandra/
+# http://saugereau.github.io/blog/2015/03/cassandra-pig/
+unzip -l /usr/share/cassandra/apache-cassandra.jar | grep CqlS
+pig -Dpig.additional.jars=/usr/share/cassandra/apache-cassandra.jar -x local
+pig -Dpig.additional.jars=/usr/share/cassandra/*.jar:/usr/share/cassandra/lib/*.jar -x local
+
+#grunt> define CqlStorage org.apache.cassandra.hadoop.pig.CqlNativeStorage();
+grunt> mykeyspace = LOAD 'cql://mykeyspace/users' USING CqlNativeStorage();
