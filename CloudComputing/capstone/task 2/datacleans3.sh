@@ -2,10 +2,11 @@
 pathWork="${HOME}/work/"
 pathRawData="${HOME}/rawdata/aviation/airline_ontime/"
 pathTemp="${HOME}/data/"
-pathOutput="/data/airline"
+#pathOutput="/data/airline"
+pathOutput="s3://cloud.datatellit.com/data/airline/"
 fname='On_Time_On_Time_Performance_'
 
-year=${1:-1988}
+year=${1:-1998}
 month=1
 
 while [ $month -le 12 ]
@@ -26,8 +27,10 @@ do
 		python dataclean.py ${tempfile} ${cleantemp}
 
 		echo -n " rows...writing HDFS..."
-		hadoop fs -rm -r -f ${hdfsfile}
-		hadoop fs -put ${cleantemp} ${pathOutput}
+#		hadoop fs -rm -r -f ${hdfsfile}
+#		hadoop fs -put ${cleantemp} ${pathOutput}
+		aws s3 rm ${hdfsfile} --recursive
+		aws s3 cp ${cleantemp} ${pathOutput}
 		echo "Done."
 
 # Delete temp files when file is cleaned and stored into HDFS

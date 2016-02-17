@@ -5,7 +5,7 @@ pathTemp="${HOME}/data/"
 pathOutput="/data/airline"
 fname='On_Time_On_Time_Performance_'
 
-year=${1:-1988}
+year=${1:-1998}
 month=1
 
 while [ $month -le 12 ]

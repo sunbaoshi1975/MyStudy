@@ -1,0 +1,183 @@
+# EMR
+- create EMR in AWS console
+- set & check security group, try 'open' group if the default EMR master/slave groups no working
+- Use hadoop user to login
+- check Java environment
+which java
+jave -version
+sudo find / -name "tools.jar" 
+echo $JAVA_HOME
+-- notes: tools.jar may exist in somewhere other than $JAVA_HOME/lib
+--- e.g. /etc/alternatives/jre/lib  v.s. /usr/lib/jvm/java-1.7.0-openjdk-1.7.0.95.x86_64/lib/tools.jar
+-- so check links
+ls -l /etc/alternatives/
+sudo cp *.* ../jre/lib/
+
+# umount & mount rawdata
+sudo umount /dev/xvdf
+
+- ** java 1.7.0  doesn't create build directory automatically, should create it by hand, e.g.
+## Task a1: top 10 airports
+rm -rf ./build/* ./TopAirports.jar
+hadoop fs -rm -r /output/a1
+export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
+mkdir build
+hadoop com.sun.tools.javac.Main TopAirports.java -d build
+jar -cvf TopAirports.jar -C build/ ./
+hadoop jar TopAirports.jar TopAirports -D N=10 /data/airline /output/a1
+hadoop fs -cat /output/a1/part*
+
+# use s3 instead of HDFS
+- create s3 in AWC main console, s3://cloud.datatellit.com/
+aws s3 ls
+aws s3 ls s3://cloud.datatellit.com/
+
+- optional: remove hadoop files if necessary
+hadoop fs -rm -r /data/
+df -hl 
+
+- extract data to s3
+./alldatas3.sh
+
+- must create logs and output folder in s3
+s3://cloud.datatellit.com/logs
+s3://cloud.datatellit.com/output
+
+# create DynamoDB intead of Cassandra by using AWC main console
+- table: capstone_b1, read unit: 2, write unit 1. (1 wu = 2 ru)
+
+# create EMR job
+- copy JAR to s3
+aws s3 cp TopAirports.jar s3://cloud.datatellit.com/src/
+- Add step in EMR console: Custom JAR
+Step type: Customer JAR
+Name: TopAirports JAR
+JAR location: s3://cloud.datatellit.com/src/TopAirports.jar
+Arguments: TopAirports -D N=10 s3://cloud.datatellit.com/data/airline/ s3://cloud.datatellit.com/output/a1/
+-- view controller log:
+--- 2016-02-13T01:54:51.793Z INFO startExec 'hadoop jar /mnt/var/lib/hadoop/steps/s-3C5G7ODTMMYJN/TopAirports.jar TopAirports -D N=10 s3://cloud.datatellit.com/data/airline/ s3://cloud.datatellit.com/output/a1/'
+
+- copy python to s3
+aws s3 cp mapper_top_airports.py s3://cloud.datatellit.com/src/
+aws s3 cp reducer_top_airports.py s3://cloud.datatellit.com/src/
+aws s3 cp toprank_g1.py s3://cloud.datatellit.com/src/
+- Add step in EMR console: streaming
+-- Note： output directory must not exist!!!
+--- download result
+aws s3 cp s3://cloud.datatellit.com/output/a1.1/ ./a1.1/  --recursive
+
+#--------------------------------------------------
+https://gist.github.com/mkanchwala/fbfdd5ef866a58a77f6e
+https://www.youtube.com/watch?v=ArUHr3Czx-8
+https://www.youtube.com/watch?v=6xM0BJuwdQk
+# install kafka
+wget http://apache.mirror.gtcomm.net/kafka/0.9.0.0/kafka_2.11-0.9.0.0.tgz
+tar -xzvf kafka_2.11-0.9.0.0.tgz
+mv kafka_2.11-0.9.0.0 kafka
+
+nano ./kafka/config/zookeeper.properties
+clientPort=2080
+server.1=172.31.53.172:2888:3888
+server.2=172.31.61.123:2888:3888
+maxClientCnxns=0
+initLimit=5
+syncLimit=2
+
+nano ./kafka/config/server.properties
+broker.id=1    or  2
+port=9092
+host.name=172.31.53.172   or  host.name=172.31.53.172
+num.partitions=4
+zookeeper.connect=172.31.53.172:2080,172.31.61.123:2080
+
+cd /tmp/
+mkdir zookeeper #Zookeeper temp dir
+cd zookeeper
+touch myid  #Zookeeper temp file
+echo '1' >> myid   or  echo '2' >> myid
+
+# start zookeeper
+~/kafka/bin/zookeeper-server-start.sh ~/kafka/config/zookeeper.properties
+# both instances
+~/kafka/bin/kafka-server-start.sh ~/kafka/config/server.properties
+
+# create topic
+--- kafka-topics.sh --zookeeper xxxx:xxxx --alter --topic xxxx --config retention.ms=xxxx
+~/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 2 --topic test
+~/kafka/bin/kafka-topics.sh --list --zookeeper localhost:2181
+
+# Producer
+~/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+
+# Consumer
+~/kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
+
+# kafka connect to s3 (read data and generate stream)
+--- HDFS: hadoop fs -cat /input/CLEAN_CSV/part-*| ~/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+
+# install pykafka (for development, see https://github.com/Parsely/pykafka)
+sudo pip install pykafka
+
+#--------------------------------------------------
+# Spark
+pyspark
+-- note: if report error='Cannot allocate memory' (errno=12), free -m check memory allocation, and restart instance
+-- Test
+inDir = 's3n://cloud.datatellit.com/data/test/test.csv'
+lines = sc.textFile(inDir)
+counts = lines.map(lambda x: x.split(',')).map(lambda x: (x[4],1)).reduceByKey(add)
+#counts = lines.map(lambda x: x.split(',')).filter(lambda x: x[0]<>'FlightDate').flatMap(lambda x:{(x[4],1),(x[5],1)}).reduceByKey(add)
+output = counts.collect()
+output
+
+# Level1: run program: s3fs
+spark-submit ./topairports.py s3n://cloud.datatellit.com/data/test/ s3n://cloud.datatellit.com/output/testa1/
+
+# Level2: S3 directly feeds Sparkstreaming
+spark-submit ./topairports_s3stream.py s3n://cloud.datatellit.com/data/test/ s3n://cloud.datatellit.com/output/testa1/
+
+# Level3: Kafka streaming 
+# Direct Approach: Spark periodically queries Kafka for the latest offsets in each topic+partition, and accordingly defines the offset ranges to process in each batch
+# Download spark-streaming-kafka*.jar
+## test kafka to sparkstreaming (first start kafka zk/server/producer)
+### consumer approach
+spark-submit --jars ./package/spark-streaming-kafka-assembly_2.10-1.6.0.jar ./src/kafka_wordcount.py localhost:2181 test
+### direct stream
+spark-submit --jars ./package/spark-streaming-kafka-assembly_2.10-1.6.0.jar ./src/direct_kafka_wordcount.py localhost:9092 spark
+-- or
+spark-submit --packages org.apache.spark:spark-streaming-kafka_2.10:1.6.0 ./src/direct_kafka_wordcount.py localhost:9092 spark
+			
+# Test & Run
+## start application
+### a.1
+spark-submit --jars ./package/spark-streaming-kafka-assembly_2.10-1.6.0.jar ./src/dk_topairports.py localhost:9092 spark
+
+### a.2
+spark-submit --jars ./package/spark-streaming-kafka-assembly_2.10-1.6.0.jar ./src/dk_topairlines.py localhost:9092 spark
+
+### all-in-one
+spark-submit --jars ./package/spark-streaming-kafka-assembly_2.10-1.6.0.jar ./src/dk_airportquery.py localhost:9092 spark
+
+## Feed data: local tiny file
+cat ./test.csv | ~/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic spark
+## Feed data: HDSF big file
+hadoop fs -cat /data/test/ontime_2008_1.csv | ~/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic spark
+## Feed with my Python producer  (very slow. why?)
+#python feedstream.py localhost:9092 spark ./data 4
+## Feed with shell: data of 2008
+./feedstream.sh 2008 $HOME/data/ 4 localhost:9092 spark
+./feedstream.sh 2008 hdfs://data/test/ 4 localhost:9092 spark
+./feedstream.sh 2008 s3://cloud.datatellit.com/data/airline/ 6 localhost:9092 spark
+
+## Feed with shell: all data
+./allstream.sh s3://cloud.datatellit.com/data/airline/ 30 localhost:9092 spark
+
+
+## install boto3, https://boto3.readthedocs.org/en/latest/guide/quickstart.html
+sudo pip install boto3
+aws configure
+
+
+
+                  .map(lambda x:((x[0][1] if x[0][3]==0 else x[0][0], x[0][2] if x[0][3]==0 else x[0][2]-timedelta(days=2)), \
+                    (x[0][3], x[1][:], x[0][0] if x[0][3]==0 else x[0][1])))
