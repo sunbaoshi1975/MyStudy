@@ -191,10 +191,15 @@ public class TopAirportCarrier extends Configured implements Tool {
             Double depDelay = (tokens[8].isEmpty() ? 0 : Double.parseDouble(tokens[8]));
             Double cancelled = (tokens[12].isEmpty() ? 0 : Double.parseDouble(tokens[12]));
             String airportCarrier = airport + delimiters + carrier;
-            
-            String countValue = "0";
-            if (cancelled < 1)
-                countValue = depDelay.toString();
+            String countValue = "1,0";
+
+            if (depDelay > 15 || cancelled >= 1) {
+                // delay > 15 min or cancelled
+                //String[] strings = {"0", "1"};
+                //TextArrayWritable val = new TextArrayWritable(strings);
+                //context.write(theKey, val);
+                countValue = "0,1";
+            }
             context.write(new Text(airportCarrier), new Text(countValue));
         }
     }
@@ -209,21 +214,34 @@ public class TopAirportCarrier extends Configured implements Tool {
             String airport = tokey[0];
             String carrier = tokey[1];
 
-            // values: list of depDelay
-            Double sumDelay = 0.0;
-            Integer nCount = 0;
+            // values = "normalcount", "delaycount"
+            Integer sumNormal = 0;
+            Integer sumDelay = 0;
             for (Text val : values) {
                 String strings = val.toString();
-                Double depDelay = Double.parseDouble(strings);
-                sumDelay += depDelay;
-                nCount++;
+                String[] tovalue = strings.split(",");
+                Integer countNormal = Integer.parseInt(tovalue[0]);
+                Integer countDelay = Integer.parseInt(tovalue[1]);
+                sumNormal += countNormal;
+                sumDelay += countDelay;
             }
-            Double avgDelay = sumDelay / nCount;
-            
+            //for (TextArrayWritable val : values) {
+            //    Text[] pair = (Text[]) val.toArray();
+            //    Integer countNormal = Integer.parseInt(pair[0].toString());
+            //    Integer countDelay = Integer.parseInt(pair[1].toString());
+            //    sumNormal += countNormal;
+            //    sumDelay += countDelay;
+            //}
+
+            //String[] strings = {carrier, sumNormal.toString(), sumDelay.toString()};
+            //TextArrayWritable val = new TextArrayWritable(strings);
+            //context.write(new Text(airport), val);
             StringBuilder builder = new StringBuilder();
             builder.append(carrier);
             builder.append(",");
-            builder.append(avgDelay.toString());
+            builder.append(sumNormal.toString());
+            builder.append(",");
+            builder.append(sumDelay.toString());
             context.write(new Text(airport), new Text(builder.toString()));
         }
     }
@@ -244,12 +262,15 @@ public class TopAirportCarrier extends Configured implements Tool {
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             // TODO
             String airport = key.toString();
+            // value = "carrier", "normalcount", "delaycount"
             String[] strings = value.toString().split(",");
             String carrier = strings[0];
-            Double avgDelay = Double.parseDouble(strings[1]);
-            Integer nRate = (int)(avgDelay * 100 + 0.5);
+            Integer countNormal = Integer.parseInt(strings[1]);
+            Integer countDelay = Integer.parseInt(strings[2]);
+            Double dblRate = countNormal * 10000d / (countNormal + countDelay);
+            Integer nRate = (int)(dblRate + 0.5);
 
-            String perform = String.format("%s(%5.2f%%)", carrier, avgDelay);
+            String perform = String.format("%s(%5.2f%%)", carrier, nRate/100d);
             thePerformance.set(perform);
             pair.setKey(airport);
             pair.setLabel(carrier);
@@ -383,8 +404,8 @@ class WritableIntPair
         if (compareValue == 0) {
             compareValue = data.compareTo(pair.getData());
         }
-        return compareValue; 		// to sort ascending
-        //return -1*compareValue;     // to sort descending
+        //return compareValue; 		// to sort ascending
+        return -1*compareValue;     // to sort descending
     }
 
     public Text getKeyLabel() {

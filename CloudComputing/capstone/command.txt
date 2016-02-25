@@ -2,6 +2,10 @@
 hadoop fs -mkdir -p /output
 mkdir build
 
+## Find tools.jar
+sudo find / -name "tools.jar"
+sudo ln /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar $JAVA_HOME/lib/tools.jar
+
 ## Task a1: top 10 airports
 rm -rf ./build/* ./TopAirports.jar
 hadoop fs -rm -r /output/a1
@@ -64,8 +68,13 @@ export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
 hadoop com.sun.tools.javac.Main TopHopFlights.java -d build
 jar -cvf TopHopFlights.jar -C build/ ./
 hadoop jar TopHopFlights.jar TopHopFlights -D N=1 /data/airline2008 /output/c2
-hadoop fs -cat /output/c2/part*
+hadoop fs -cat /output/c2/part* >> c2.csv
 hadoop fs -get /output/c2/part* c2.csv
+
+grep '^BOS,ATL,LAX,03/04/2008' c2.csv >> c2r.csv
+grep '^PHX,JFK,MSP,07/09/2008' c2.csv >> c2r.csv
+grep '^DFW,STL,ORD,24/01/2008' c2.csv >> c2r.csv
+grep '^LAX,MIA,LAX,16/05/2008' c2.csv >> c2r.csv
 
 # R
 df <- tbl_df(read.csv("c1.csv", sep="\t", header=FALSE))

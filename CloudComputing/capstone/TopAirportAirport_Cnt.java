@@ -36,18 +36,18 @@ import java.util.List;
 import java.util.TreeSet;
 
 // >>> Don't Change
-public class TopAirportCarrier extends Configured implements Tool {
+public class TopAirportAirport extends Configured implements Tool {
 
-    private static Logger theLogger = Logger.getLogger(TopAirportCarrier.class);
+    private static Logger theLogger = Logger.getLogger(TopAirportAirport.class);
 
     public static void main(String[] args) throws Exception {
         // Make sure there are exactly 2 parameters
         if (args.length < 2) {
-            theLogger.warn("TopAirportCarrier <input-dir> <output-dir>");
-            throw new IllegalArgumentException("TopAirportCarrier <input-dir> <output-dir>");
+            theLogger.warn("TopAirportAirport <input-dir> <output-dir>");
+            throw new IllegalArgumentException("TopAirportAirport <input-dir> <output-dir>");
         }
 
-        int res = ToolRunner.run(new Configuration(), new TopAirportCarrier(), args);
+        int res = ToolRunner.run(new Configuration(), new TopAirportAirport(), args);
         theLogger.info("returnStatus=" +res);
         System.exit(res);
     }
@@ -72,18 +72,18 @@ public class TopAirportCarrier extends Configured implements Tool {
         FileInputFormat.setInputPaths(jobA, new Path(args[0]));
         FileOutputFormat.setOutputPath(jobA, tmpPath);
 
-        jobA.setJarByClass(TopAirportCarrier.class);
+        jobA.setJarByClass(TopAirportAirport.class);
         jobA.waitForCompletion(true);
 
-        Job jobB = Job.getInstance(conf, "Top Ontime Airport Carriers");
+        Job jobB = Job.getInstance(conf, "Top Ontime Destination Airports");
         jobB.setOutputKeyClass(Text.class);
         jobB.setOutputValueClass(Text.class);
 
         jobB.setMapOutputKeyClass(WritableIntPair.class);
         jobB.setMapOutputValueClass(Text.class);
 
-        jobB.setMapperClass(TopAirportCarrierMap.class);
-        jobB.setReducerClass(TopAirportCarrierReduce.class);
+        jobB.setMapperClass(TopAirportAirportMap.class);
+        jobB.setReducerClass(TopAirportAirportReduce.class);
         jobB.setPartitionerClass(CustPartitioner.class);
         jobB.setGroupingComparatorClass(CustGroupingComparator.class);
         //jobB.setNumReduceTasks(1);
@@ -94,7 +94,7 @@ public class TopAirportCarrier extends Configured implements Tool {
         jobB.setInputFormatClass(KeyValueTextInputFormat.class);
         jobB.setOutputFormatClass(TextOutputFormat.class);
 
-        jobB.setJarByClass(TopAirportCarrier.class);
+        jobB.setJarByClass(TopAirportAirport.class);
         boolean status = jobB.waitForCompletion(true);
         theLogger.info("run(): status="+status);
         return  status ? 0 : 1;
@@ -180,22 +180,27 @@ public class TopAirportCarrier extends Configured implements Tool {
             String line = value.toString();
             String[] tokens = line.split(delimiters);
 
-            // 2: Carrier; 4: Origin; 8:DepDelay; 12: Cancelled (0 - based)
-            if (tokens[2].compareToIgnoreCase("Carrier") == 0) {
+            // 4: Origin; 5:Dest; 8:DepDelay; 12: Cancelled (0 - based)
+            if (tokens[0].compareToIgnoreCase("FlightDate") == 0) {
                 // Header
                 return;
             }
 
-            String carrier = tokens[2];
             String airport = tokens[4];
+            String dest = tokens[5];
             Double depDelay = (tokens[8].isEmpty() ? 0 : Double.parseDouble(tokens[8]));
             Double cancelled = (tokens[12].isEmpty() ? 0 : Double.parseDouble(tokens[12]));
-            String airportCarrier = airport + delimiters + carrier;
-            
-            String countValue = "0";
-            if (cancelled < 1)
-                countValue = depDelay.toString();
-            context.write(new Text(airportCarrier), new Text(countValue));
+            String airportDest = airport + delimiters + dest;
+            String countValue = "1,0";
+
+            if (depDelay > 15 || cancelled >= 1) {
+                // delay > 15 min or cancelled
+                //String[] strings = {"0", "1"};
+                //TextArrayWritable val = new TextArrayWritable(strings);
+                //context.write(theKey, val);
+                countValue = "0,1";
+            }
+            context.write(new Text(airportDest), new Text(countValue));
         }
     }
 
@@ -203,32 +208,35 @@ public class TopAirportCarrier extends Configured implements Tool {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             // TODO
-            // key = "airport", "carrier"
+            // key = "airport", "dest"
             String keys = key.toString();
             String[] tokey = keys.split(",");
             String airport = tokey[0];
-            String carrier = tokey[1];
+            String dest = tokey[1];
 
-            // values: list of depDelay
-            Double sumDelay = 0.0;
-            Integer nCount = 0;
+            // values = "normalcount", "delaycount"
+            Integer sumNormal = 0;
+            Integer sumDelay = 0;
             for (Text val : values) {
                 String strings = val.toString();
-                Double depDelay = Double.parseDouble(strings);
-                sumDelay += depDelay;
-                nCount++;
+                String[] tovalue = strings.split(",");
+                Integer countNormal = Integer.parseInt(tovalue[0]);
+                Integer countDelay = Integer.parseInt(tovalue[1]);
+                sumNormal += countNormal;
+                sumDelay += countDelay;
             }
-            Double avgDelay = sumDelay / nCount;
-            
+
             StringBuilder builder = new StringBuilder();
-            builder.append(carrier);
+            builder.append(dest);
             builder.append(",");
-            builder.append(avgDelay.toString());
+            builder.append(sumNormal.toString());
+            builder.append(",");
+            builder.append(sumDelay.toString());
             context.write(new Text(airport), new Text(builder.toString()));
         }
     }
 
-    public static class TopAirportCarrierMap extends Mapper<Text, Text, WritableIntPair, Text> {
+    public static class TopAirportAirportMap extends Mapper<Text, Text, WritableIntPair, Text> {
         Integer N;
         private Text thePerformance = new Text();
         private WritableIntPair pair = new WritableIntPair();
@@ -244,22 +252,25 @@ public class TopAirportCarrier extends Configured implements Tool {
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             // TODO
             String airport = key.toString();
+            // value = "dest", "normalcount", "delaycount"
             String[] strings = value.toString().split(",");
-            String carrier = strings[0];
-            Double avgDelay = Double.parseDouble(strings[1]);
-            Integer nRate = (int)(avgDelay * 100 + 0.5);
+            String dest = strings[0];
+            Integer countNormal = Integer.parseInt(strings[1]);
+            Integer countDelay = Integer.parseInt(strings[2]);
+            Double dblRate = countNormal * 10000d / (countNormal + countDelay);
+            Integer nRate = (int)(dblRate + 0.5);
 
-            String perform = String.format("%s(%5.2f%%)", carrier, avgDelay);
+            String perform = String.format("%s(%5.2f%%)", dest, nRate/100d);
             thePerformance.set(perform);
             pair.setKey(airport);
-            pair.setLabel(carrier);
+            pair.setLabel(dest);
             pair.setData(nRate);
 
             context.write(pair, thePerformance);
         }
     }
 
-    public static class TopAirportCarrierReduce extends Reducer<WritableIntPair, Text, Text, Text> {
+    public static class TopAirportAirportReduce extends Reducer<WritableIntPair, Text, Text, Text> {
         Integer N;
         // TODO
         @Override
@@ -271,7 +282,7 @@ public class TopAirportCarrier extends Configured implements Tool {
         @Override
         public void reduce(WritableIntPair key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             // TODO
-            // values = ordered carriers list
+            // values = ordered destination airport list
             StringBuilder builder = new StringBuilder();
             int index = 0;
             for (Text val : values) {
@@ -383,8 +394,8 @@ class WritableIntPair
         if (compareValue == 0) {
             compareValue = data.compareTo(pair.getData());
         }
-        return compareValue; 		// to sort ascending
-        //return -1*compareValue;     // to sort descending
+        //return compareValue; 		// to sort ascending
+        return -1*compareValue;     // to sort descending
     }
 
     public Text getKeyLabel() {

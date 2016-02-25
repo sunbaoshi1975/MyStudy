@@ -372,6 +372,11 @@ CRSArrTime(34), ArrTime(35), ArrDelay(36), Cancelled(41)
 
 hadoop fs -mkdir -p /data/airline
 
+# permission
+sudo apt-get install zip
+sudo chmod +x alldata.sh
+sudo chmod +x dataclean.sh
+
 # test
 python ./dataclean.py <input.csv> <output.csv>
 ./dataclean.sh 1998

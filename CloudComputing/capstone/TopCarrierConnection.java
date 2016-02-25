@@ -192,12 +192,10 @@ public class TopCarrierConnection extends Configured implements Tool {
             Double arrDelay = (tokens[11].isEmpty() ? 0 : Double.parseDouble(tokens[11]));
             Double cancelled = (tokens[12].isEmpty() ? 0 : Double.parseDouble(tokens[12]));
             String airportDest = airport + delimiters + dest + delimiters + carrier;
-            String countValue = "1,0";
 
-            if (arrDelay > 15 || cancelled >= 1) {
-                // arrDelay > 15 min or cancelled
-                countValue = "0,1";
-            }
+            String countValue = "0";
+            if (cancelled < 1)
+                countValue = arrDelay.toString();
             context.write(new Text(airportDest), new Text(countValue));
         }
     }
@@ -213,25 +211,22 @@ public class TopCarrierConnection extends Configured implements Tool {
             String dest = tokey[1];
             String carrier = tokey[2];
 
-            // values = "normalcount", "delaycount"
-            Integer sumNormal = 0;
-            Integer sumDelay = 0;
+            // values: list of arrDelay
+            Double sumDelay = 0.0;
+            Integer nCount = 0;
             for (Text val : values) {
                 String strings = val.toString();
-                String[] tovalue = strings.split(",");
-                Integer countNormal = Integer.parseInt(tovalue[0]);
-                Integer countDelay = Integer.parseInt(tovalue[1]);
-                sumNormal += countNormal;
-                sumDelay += countDelay;
+                Double arrDelay = Double.parseDouble(strings);
+                sumDelay += arrDelay;
+                nCount++;
             }
-
+            Double avgDelay = sumDelay / nCount;
+            
             String airportDest = airport + "," + dest;
             StringBuilder builder = new StringBuilder();
             builder.append(carrier);
             builder.append(",");
-            builder.append(sumNormal.toString());
-            builder.append(",");
-            builder.append(sumDelay.toString());
+            builder.append(avgDelay.toString());
             context.write(new Text(airportDest), new Text(builder.toString()));
         }
     }
@@ -255,15 +250,12 @@ public class TopCarrierConnection extends Configured implements Tool {
             String[] tokey = key.toString().split(",");
             String airport = tokey[0];
             String dest = tokey[1];
-            // value = "carrier", "normalcount", "delaycount"
             String[] strings = value.toString().split(",");
             String carrier = strings[0];
-            Integer countNormal = Integer.parseInt(strings[1]);
-            Integer countDelay = Integer.parseInt(strings[2]);
-            Double dblRate = countNormal * 10000d / (countNormal + countDelay);
-            Integer nRate = (int)(dblRate + 0.5);
+            Double avgDelay = Double.parseDouble(strings[1]);
+            Integer nRate = (int)(avgDelay * 100 + 0.5);
 
-            String perform = String.format("%s(%5.2f%%)", carrier, nRate/100d);
+            String perform = String.format("%s(%5.2f%%)", carrier, avgDelay);
             thePerformance.set(perform);
             pair.setKey(key.toString());
             pair.setLabel(carrier);
@@ -397,8 +389,8 @@ class WritableIntPair
         if (compareValue == 0) {
             compareValue = data.compareTo(pair.getData());
         }
-        //return compareValue; 		// to sort ascending
-        return -1*compareValue;     // to sort descending
+        return compareValue; 		// to sort ascending
+        //return -1*compareValue;     // to sort descending
     }
 
     public Text getKeyLabel() {
